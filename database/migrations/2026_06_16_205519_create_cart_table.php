@@ -21,12 +21,12 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('product')->onDelete('cascade');
             $table->timestamps();
 
-            //adding neccessery indexes onyl
+            // adding neccessery indexes onyl
             $table->index('product_id');
             $table->index('quantity');
             $table->index('price');
             $table->index('total');
-            
+
         });
     }
 

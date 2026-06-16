@@ -17,10 +17,9 @@ return new class extends Migration
             $table->string('description');
             $table->timestamps();
 
-
-            //adding indexes
+            // adding indexes
             $table->index('name');
-            
+
         });
     }
 

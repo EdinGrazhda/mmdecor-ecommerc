@@ -22,7 +22,7 @@ return new class extends Migration
             $table->foreign('category_id')->references('id')->on('category')->onDelete('cascade');
             $table->timestamps();
 
-            //add a indexes
+            // add a indexes
             $table->index('category_id');
             $table->index('name');
             $table->index('price');

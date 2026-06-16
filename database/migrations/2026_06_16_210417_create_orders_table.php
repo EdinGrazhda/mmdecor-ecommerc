@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('unique_id')->unique();
-             // Customer Information
+            // Customer Information
             $table->string('customer_full_name');
             $table->string('customer_email');
             $table->string('customer_phone');
             $table->text('customer_address');
             $table->string('customer_city');
             $table->enum('customer_country', ['albania', 'kosovo', 'macedonia']);
-            
+
             // Product Information
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->string('product_name'); // Store product name at time of order
@@ -30,27 +30,27 @@ return new class extends Migration
             $table->string('product_size')->nullable(); // Selected size/foot number
             $table->string('product_color')->nullable(); // Selected color
             $table->integer('quantity')->default(1);
-            
+
             // Order Details
             $table->decimal('total_amount', 8, 2);
             $table->enum('payment_method', ['cash'])->default('cash');
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
-            
+
             // Tracking
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('shipped_at')->nullable();
-            $table->timestamp('delivered_at')->nullable();  
-            
+            $table->timestamp('delivered_at')->nullable();
+
             $table->timestamps();
 
-            //adding indexes
-            $table->index('unique_id','unique_id_idx');
-            $table->index('customer_phone','customer_phone_idx');
-            $table->index('product_id','product_id_idx');
-            $table->index('status','status_idx');
-            $table->index('customer_country','customer_country_idx');
-            $table->index(['confirmed_at', 'shipped_at', 'delivered_at'],'tracking_idx');
+            // adding indexes
+            $table->index('unique_id', 'unique_id_idx');
+            $table->index('customer_phone', 'customer_phone_idx');
+            $table->index('product_id', 'product_id_idx');
+            $table->index('status', 'status_idx');
+            $table->index('customer_country', 'customer_country_idx');
+            $table->index(['confirmed_at', 'shipped_at', 'delivered_at'], 'tracking_idx');
         });
     }
 
