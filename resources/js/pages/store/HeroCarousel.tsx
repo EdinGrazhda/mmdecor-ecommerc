@@ -87,7 +87,10 @@ export const HeroCarousel = memo(function HeroCarousel({
                     <div className="flex flex-wrap items-center gap-3">
                         <button
                             className="group/btn flex items-center gap-2 rounded-lg bg-[#2E6F8F] px-6 py-3 text-sm font-black tracking-wide text-white transition-all hover:bg-[#3A86AB] active:scale-95"
-                            onClick={() => current.featured.product && onAddToCart(current.featured.product)}
+                            onClick={() =>
+                                current.featured.product &&
+                                onAddToCart(current.featured.product)
+                            }
                         >
                             {current.cta}
                             <ChevronRight
@@ -119,9 +122,11 @@ export const HeroCarousel = memo(function HeroCarousel({
                             <div className="hero-product-pattern pointer-events-none absolute inset-0 opacity-[0.25]" />
                             {current.featured.image ? (
                                 <img
-                                    src={normalizeImageUrl(
-                                        current.featured.image,
-                                    ) ?? undefined}
+                                    src={
+                                        normalizeImageUrl(
+                                            current.featured.image,
+                                        ) ?? undefined
+                                    }
                                     alt={current.featured.name}
                                     loading="eager"
                                     fetchPriority="high"
@@ -197,7 +202,10 @@ export const HeroCarousel = memo(function HeroCarousel({
                         {/* Add to Cart */}
                         <button
                             className="mb-2 w-full rounded-lg bg-[#2E6F8F] py-2.5 text-sm font-black text-white transition-all hover:bg-[#3A86AB] active:scale-[0.98]"
-                            onClick={() => current.featured.product && onAddToCart(current.featured.product)}
+                            onClick={() =>
+                                current.featured.product &&
+                                onAddToCart(current.featured.product)
+                            }
                         >
                             Add to Cart
                         </button>
