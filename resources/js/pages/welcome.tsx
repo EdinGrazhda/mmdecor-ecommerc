@@ -1,6 +1,14 @@
 import { Head } from '@inertiajs/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Minus, Plus, ShoppingCart, Trash2, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { precacheImages } from '@/lib/media';
 import { CatalogSection } from './store/CatalogSection';
 import { HeroCarousel } from './store/HeroCarousel';
@@ -53,6 +61,7 @@ export default function Welcome({
     const [cartTotal, setCartTotal] = useState(0);
     const [cartOpen, setCartOpen] = useState(false);
     const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const [confirmCheckoutOpen, setConfirmCheckoutOpen] = useState(false);
     const [cartBusy, setCartBusy] = useState(false);
     const [orderMessage, setOrderMessage] = useState('');
     const [checkoutErrors, setCheckoutErrors] = useState<Record<string, string>>({});
@@ -132,9 +141,10 @@ export default function Welcome({
         syncCart(cart);
     }
 
-    async function submitCheckout(e: React.FormEvent | React.MouseEvent) {
-        e.preventDefault();
+    async function submitCheckout(e?: React.FormEvent | React.MouseEvent) {
+        e?.preventDefault();
         setCartBusy(true);
+        setConfirmCheckoutOpen(false);
         setCheckoutErrors({});
         setOrderMessage('');
 
@@ -159,6 +169,7 @@ export default function Welcome({
         } catch (error) {
             if (error instanceof CheckoutError) {
                 setCheckoutErrors(error.errors);
+                setCartOpen(true);
             }
         } finally {
             setCartBusy(false);
@@ -210,10 +221,49 @@ export default function Welcome({
                     onCheckoutChange={setCheckoutForm}
                     onClose={() => setCartOpen(false)}
                     onRemove={removeCartItem}
+                    onRequestCheckoutConfirmation={() => {
+                        setCartOpen(false);
+                        setConfirmCheckoutOpen(true);
+                    }}
                     onSubmitCheckout={submitCheckout}
                     onToggleCheckout={setCheckoutOpen}
                     onUpdateQuantity={updateCartItem}
                 />
+                <Dialog
+                    open={confirmCheckoutOpen}
+                    onOpenChange={(open) => {
+                        setConfirmCheckoutOpen(open);
+
+                        if (!open && checkoutOpen && cartItems.length > 0 && !cartBusy) {
+                            setCartOpen(true);
+                        }
+                    }}
+                >
+                    <DialogContent className="max-w-md">
+                        <DialogTitle>Confirm your order</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to place this order now? Your checkout details and cart items will be submitted.
+                        </DialogDescription>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <button
+                                    type="button"
+                                    className="rounded-xl border border-[#D1E8F2] px-4 py-2 text-sm font-bold text-[#0D2535] transition hover:bg-[#EBF3F7]"
+                                >
+                                    Cancel
+                                </button>
+                            </DialogClose>
+                            <button
+                                type="button"
+                                disabled={cartBusy}
+                                onClick={(e) => void submitCheckout(e)}
+                                className="rounded-xl bg-[#2E6F8F] px-4 py-2 text-sm font-black text-white disabled:opacity-60"
+                            >
+                                {cartBusy ? 'Placing order...' : 'Confirm order'}
+                            </button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </>
     );
@@ -231,6 +281,7 @@ function CartDrawer({
     onCheckoutChange,
     onClose,
     onRemove,
+    onRequestCheckoutConfirmation,
     onSubmitCheckout,
     onToggleCheckout,
     onUpdateQuantity,
@@ -246,7 +297,8 @@ function CartDrawer({
     onCheckoutChange: (form: CheckoutForm) => void;
     onClose: () => void;
     onRemove: (item: CartItem) => void;
-    onSubmitCheckout: (e: React.FormEvent | React.MouseEvent) => void;
+    onRequestCheckoutConfirmation: () => void;
+    onSubmitCheckout: (e?: React.FormEvent | React.MouseEvent) => Promise<void>;
     onToggleCheckout: (open: boolean) => void;
     onUpdateQuantity: (item: CartItem, quantity: number) => void;
 }) {
@@ -360,7 +412,11 @@ function CartDrawer({
                             <span className="text-xl font-black text-[#0D2535]">${cartTotal.toFixed(2)}</span>
                         </div>
                         {checkoutOpen ? (
-                            <button disabled={cartBusy} onClick={onSubmitCheckout} className="w-full rounded-xl bg-[#2E6F8F] py-3 text-sm font-black text-white disabled:opacity-60">
+                            <button
+                                disabled={cartBusy}
+                                onClick={onRequestCheckoutConfirmation}
+                                className="w-full rounded-xl bg-[#2E6F8F] py-3 text-sm font-black text-white disabled:opacity-60"
+                            >
                                 {cartBusy ? 'Placing order...' : 'Place order'}
                             </button>
                         ) : (
@@ -442,6 +498,7 @@ async function cartRequest(path: string, options: RequestInit = {}) {
     });
 
     let payload;
+
     try {
         payload = await response.json();
     } catch {
@@ -464,6 +521,7 @@ async function cartRequest(path: string, options: RequestInit = {}) {
 
         const errorMsg = payload.message ?? payload.exception ?? `HTTP ${response.status}: ${response.statusText}`;
         console.error('Cart request error details:', { status: response.status, message: errorMsg, payload });
+
         throw new Error(errorMsg);
     }
 

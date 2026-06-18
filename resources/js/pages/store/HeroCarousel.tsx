@@ -33,7 +33,7 @@ export const HeroCarousel = memo(function HeroCarousel({
             {/* Blue accent stripe */}
             <div className="absolute top-0 right-0 bottom-0 w-1.5 bg-[#2E6F8F]" />
 
-            <div className="relative mx-auto flex max-w-7xl flex-col justify-center px-5 py-8 sm:px-6 sm:py-12 lg:flex-row lg:items-center lg:gap-12 lg:px-8 lg:py-16">
+            <div className="relative mx-auto flex max-w-7xl flex-col justify-center px-5 py-8 sm:px-6 sm:py-12 md:flex-row md:items-center md:gap-8 md:px-8 md:py-12 lg:gap-12 lg:px-8 lg:py-16">
                 {/* ── LEFT: text block ── */}
                 <div className="flex-1 space-y-5">
                     {/* Eyebrow badge */}
@@ -102,7 +102,7 @@ export const HeroCarousel = memo(function HeroCarousel({
                 </div>
 
                 {/* ── RIGHT: featured product card ── */}
-                <div className="mx-auto mt-8 w-full max-w-xs lg:mx-0 lg:mt-0 lg:w-[280px] lg:shrink-0 xl:w-[296px]">
+                <div className="mx-auto mt-8 w-full max-w-xs md:mx-0 md:mt-0 md:w-[240px] md:shrink-0 lg:w-[280px] xl:w-[296px]">
                     <div className="group relative rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.085]">
                         {/* Discount corner badge */}
                         <div className="absolute -top-3 -right-3 flex h-12 w-12 flex-col items-center justify-center rounded-full bg-red-500 shadow-lg ring-2 ring-[#0D2535]">
