@@ -83,6 +83,10 @@ export default function Welcome({
 
             syncCart(cart);
             setCartOpen(true);
+            setOrderMessage(`${product.name} added to cart!`);
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            setOrderMessage(`Failed to add item to cart: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
             setCartBusy(false);
         }
@@ -420,21 +424,31 @@ class CheckoutError extends Error {
 }
 
 async function cartRequest(path: string, options: RequestInit = {}) {
+    const csrfToken = document
+        .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+        ?.getAttribute('content') ?? '';
+
+    console.log('Cart request:', { method: options.method || 'GET', path, csrfToken: csrfToken ? 'present' : 'missing' });
+
     const response = await fetch(path, {
         credentials: 'same-origin',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN':
-                document
-                    .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
-                    ?.getAttribute('content') ?? '',
+            'X-CSRF-TOKEN': csrfToken,
             ...(options.headers ?? {}),
         },
         ...options,
     });
 
-    const payload = await response.json().catch(() => ({}));
+    let payload;
+    try {
+        payload = await response.json();
+    } catch {
+        payload = { message: `Failed to parse response: ${response.statusText}` };
+    }
+
+    console.log('Cart response:', { status: response.status, ok: response.ok, payload });
 
     if (!response.ok) {
         if (response.status === 422 && payload.errors) {
@@ -448,7 +462,9 @@ async function cartRequest(path: string, options: RequestInit = {}) {
             throw new CheckoutError(errors);
         }
 
-        throw new Error(payload.message ?? 'Cart request failed.');
+        const errorMsg = payload.message ?? payload.exception ?? `HTTP ${response.status}: ${response.statusText}`;
+        console.error('Cart request error details:', { status: response.status, message: errorMsg, payload });
+        throw new Error(errorMsg);
     }
 
     return payload;

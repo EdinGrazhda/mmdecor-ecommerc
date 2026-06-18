@@ -73,9 +73,9 @@ export const HeroCarousel = memo(function HeroCarousel({
 
                     {/* Category quick chips */}
                     <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
-                        {current.chips.map((chip) => (
+                        {current.chips.map((chip, i) => (
                             <button
-                                key={chip}
+                                key={i}
                                 className="shrink-0 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold text-white/65 transition-all hover:border-[#5AAFD4]/50 hover:bg-[#2E6F8F]/25 hover:text-white"
                             >
                                 {chip}
