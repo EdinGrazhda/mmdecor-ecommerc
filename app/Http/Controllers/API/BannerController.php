@@ -7,6 +7,7 @@ use App\Http\Requests\API\StoreBannerRequest;
 use App\Http\Requests\API\UpdateBannerRequest;
 use App\Http\Resources\BannerResource;
 use App\Models\Banner;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -40,7 +41,14 @@ class BannerController extends Controller
     public function store(StoreBannerRequest $request)
     {
         try {
-            $banner = Banner::create($request->validated());
+            $validated = $request->validated();
+
+            $banner = Banner::create([
+                ...collect($validated)->except('image')->all(),
+                'image' => '',
+            ]);
+
+            $this->attachImage($banner, $request->file('image'));
 
             Cache::flush();
 
@@ -87,7 +95,11 @@ class BannerController extends Controller
     {
         try {
             $banner = Banner::findOrFail($id);
-            $banner->update($request->validated());
+            $validated = $request->validated();
+
+            $banner->update(collect($validated)->except('image')->all());
+
+            $this->attachImage($banner, $request->file('image'));
 
             Cache::flush();
 
@@ -131,5 +143,19 @@ class BannerController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
+    }
+
+    private function attachImage(Banner $banner, ?UploadedFile $image): void
+    {
+        if (! $image) {
+            return;
+        }
+
+        $banner
+            ->addMedia($image)
+            ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
+            ->toMediaCollection('images');
+
+        $banner->syncImageColumnFromMedia();
     }
 }

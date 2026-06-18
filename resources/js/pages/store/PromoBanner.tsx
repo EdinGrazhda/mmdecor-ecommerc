@@ -1,4 +1,5 @@
 import { Award, HeadphonesIcon, RotateCcw, Truck } from 'lucide-react';
+import { memo } from 'react';
 
 const TRUST_PILLARS = [
     {
@@ -23,17 +24,10 @@ const TRUST_PILLARS = [
     },
 ];
 
-export function PromoBanner() {
+export const PromoBanner = memo(function PromoBanner() {
     return (
         <section className="relative overflow-hidden bg-[#0D2535] py-14">
-            <div
-                className="pointer-events-none absolute inset-0 opacity-[0.04]"
-                style={{
-                    backgroundImage:
-                        'repeating-linear-gradient(-45deg, rgba(255,255,255,1) 0, rgba(255,255,255,1) 1px, transparent 0, transparent 50%)',
-                    backgroundSize: '12px 12px',
-                }}
-            />
+            <div className="promo-stripe-pattern pointer-events-none absolute inset-0 opacity-[0.04]" />
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Heading */}
                 <div className="mb-10 text-center">
@@ -70,4 +64,4 @@ export function PromoBanner() {
             </div>
         </section>
     );
-}
+});

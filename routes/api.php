@@ -17,7 +17,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::apiResource('products', ProductController::class);
-Route::apiResource('categories', CategoryController::class);
-Route::apiResource('campaigns', CampaignController::class);
-Route::apiResource('banners', BannerController::class);
+Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
+Route::apiResource('campaigns', CampaignController::class)->only(['index', 'show']);
+Route::apiResource('banners', BannerController::class)->only(['index', 'show']);
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::apiResource('products', ProductController::class)->except(['index', 'show']);
+    Route::apiResource('categories', CategoryController::class)->except(['index', 'show']);
+    Route::apiResource('campaigns', CampaignController::class)->except(['index', 'show']);
+    Route::apiResource('banners', BannerController::class)->except(['index', 'show']);
+});

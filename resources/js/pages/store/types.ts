@@ -1,14 +1,18 @@
-import type { LucideIcon } from 'lucide-react';
-
 export interface Product {
     id: number;
+    product_id?: string;
     name: string;
     brand: string;
+    image?: string | null;
+    image_thumb?: string | null;
     price: number;
     originalPrice: number | null;
+    discountPercent?: number | null;
     rating: number;
     reviews: number;
     tag: string | null;
+    stock?: number;
+    category_id?: number;
     category: string;
 }
 
@@ -39,11 +43,26 @@ export interface HeroSlide {
 export interface Category {
     id: number;
     label: string;
+    description?: string;
     count: number;
 }
 
-export interface TrustItem {
-    icon: LucideIcon;
-    label: string;
-    desc: string;
+export interface Banner {
+    id: number;
+    title: string;
+    subtitle: string;
+    image: string | null;
+    image_thumb?: string | null;
 }
+
+export interface Campaign {
+    id: number;
+    campaing_name: string;
+    description: string;
+    price: number;
+    start_date: string;
+    end_date: string;
+    product_id: number;
+    product?: Product;
+}
+

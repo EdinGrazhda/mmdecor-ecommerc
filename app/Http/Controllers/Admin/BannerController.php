@@ -7,6 +7,7 @@ use App\Http\Requests\API\StoreBannerRequest;
 use App\Http\Requests\API\UpdateBannerRequest;
 use App\Models\Banner;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Inertia\Inertia;
 
 class BannerController extends Controller
@@ -43,7 +44,14 @@ class BannerController extends Controller
      */
     public function store(StoreBannerRequest $request)
     {
-        Banner::create($request->validated());
+        $validated = $request->validated();
+
+        $banner = Banner::create([
+            ...collect($validated)->except('image')->all(),
+            'image' => '',
+        ]);
+
+        $this->attachImage($banner, $request->file('image'));
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner created successfully.');
     }
@@ -73,7 +81,11 @@ class BannerController extends Controller
      */
     public function update(UpdateBannerRequest $request, Banner $banner)
     {
-        $banner->update($request->validated());
+        $validated = $request->validated();
+
+        $banner->update(collect($validated)->except('image')->all());
+
+        $this->attachImage($banner, $request->file('image'));
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner updated successfully.');
     }
@@ -86,5 +98,19 @@ class BannerController extends Controller
         $banner->delete();
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner deleted successfully.');
+    }
+
+    private function attachImage(Banner $banner, ?UploadedFile $image): void
+    {
+        if (! $image) {
+            return;
+        }
+
+        $banner
+            ->addMedia($image)
+            ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
+            ->toMediaCollection('images');
+
+        $banner->syncImageColumnFromMedia();
     }
 }

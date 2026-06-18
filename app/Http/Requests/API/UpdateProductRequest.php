@@ -29,7 +29,7 @@ class UpdateProductRequest extends FormRequest
 
         return [
             'product_id' => ['sometimes', 'required', 'string', 'max:255', 'unique:product,product_id,'.$productId],
-            'image' => ['sometimes', 'required', 'string', 'max:255'],
+            'image' => ['sometimes', 'nullable', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'stock' => ['sometimes', 'required', 'integer', 'min:0'],

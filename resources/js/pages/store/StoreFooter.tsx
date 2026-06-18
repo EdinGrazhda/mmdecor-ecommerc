@@ -1,4 +1,6 @@
+
 import { Phone } from 'lucide-react';
+import { memo } from 'react';
 
 const FOOTER_COLUMNS = [
     {
@@ -27,7 +29,7 @@ const FOOTER_COLUMNS = [
     },
 ];
 
-export function StoreFooter() {
+export const StoreFooter = memo(function StoreFooter() {
     return (
         <footer className="border-t border-[#E2EEF4] bg-white">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -93,4 +95,4 @@ export function StoreFooter() {
             </div>
         </footer>
     );
-}
+});

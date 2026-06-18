@@ -1,5 +1,4 @@
-import { RotateCcw, ShieldCheck, Truck, Zap } from 'lucide-react';
-import type { Category, HeroSlide, Product, TrustItem } from './types';
+import type { Category, HeroSlide, Product } from './types';
 
 export const CATEGORIES: Category[] = [
     { id: 0, label: 'All Parts', count: 5620 },
@@ -170,17 +169,3 @@ export const HERO_SLIDES: HeroSlide[] = [
     },
 ];
 
-export const TRUST_ITEMS: TrustItem[] = [
-    { icon: Truck, label: 'Free Shipping', desc: 'On orders over $75' },
-    {
-        icon: ShieldCheck,
-        label: 'Genuine Parts',
-        desc: 'OEM & OE-quality only',
-    },
-    { icon: RotateCcw, label: '60-Day Returns', desc: 'No questions asked' },
-    {
-        icon: Zap,
-        label: 'Fast Dispatch',
-        desc: 'Same-day on orders before 2 PM',
-    },
-];

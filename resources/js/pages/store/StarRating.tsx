@@ -1,4 +1,5 @@
 import { Star } from 'lucide-react';
+import { memo } from 'react';
 
 interface StarRatingProps {
     rating: number;
@@ -7,7 +8,7 @@ interface StarRatingProps {
     size?: number;
 }
 
-export function StarRating({
+export const StarRating = memo(function StarRating({
     rating,
     variant = 'brand',
     size = 10,
@@ -32,4 +33,4 @@ export function StarRating({
             ))}
         </span>
     );
-}
+});

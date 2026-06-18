@@ -1,31 +1,44 @@
-import { useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { ChevronRight, Heart, Search, ShoppingCart, X } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/media';
 import { CATEGORIES, PRODUCTS } from './data';
 import { TagBadge } from './TagBadge';
 import { StarRating } from './StarRating';
+import type { Category, Product } from './types';
 
 interface CatalogSectionProps {
+    categories?: Category[];
+    products?: Product[];
     catSidebarOpen: boolean;
     setCatSidebarOpen: (open: boolean) => void;
-    onAddToCart: () => void;
+    onAddToCart: (product: Product) => void;
 }
 
 export function CatalogSection({
+    categories = CATEGORIES,
+    products = PRODUCTS,
     catSidebarOpen,
     setCatSidebarOpen,
     onAddToCart,
 }: CatalogSectionProps) {
+    const categoryItems = Array.isArray(categories) ? categories : CATEGORIES;
+    const productItems = Array.isArray(products) ? products : PRODUCTS;
     const [activeCategoryId, setActiveCategoryId] = useState(0);
     const [sortBy, setSortBy] = useState('featured');
     const [wishlist, setWishlist] = useState<number[]>([]);
 
-    const activeCategory = CATEGORIES.find((c) => c.id === activeCategoryId);
+    const activeCategory = useMemo(
+        () => categoryItems.find((c) => c.id === activeCategoryId),
+        [activeCategoryId, categoryItems],
+    );
 
-    const visibleProducts = (() => {
+    const visibleProducts = useMemo(() => {
         let list =
             activeCategoryId === 0
-                ? PRODUCTS
-                : PRODUCTS.filter((p) => p.category === activeCategory?.label);
+                ? productItems
+                : productItems.filter(
+                      (p) => p.category === activeCategory?.label,
+                  );
         if (sortBy === 'price-asc')
             list = [...list].sort((a, b) => a.price - b.price);
         if (sortBy === 'price-desc')
@@ -33,13 +46,15 @@ export function CatalogSection({
         if (sortBy === 'rating')
             list = [...list].sort((a, b) => b.rating - a.rating);
         return list;
-    })();
+    }, [activeCategory?.label, activeCategoryId, productItems, sortBy]);
 
-    function toggleWishlist(id: number) {
+    const wishlistSet = useMemo(() => new Set(wishlist), [wishlist]);
+
+    const toggleWishlist = useCallback((id: number) => {
         setWishlist((prev) =>
             prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
         );
-    }
+    }, []);
 
     return (
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -77,7 +92,7 @@ export function CatalogSection({
                     </p>
 
                     <ul className="mt-2 lg:mt-0">
-                        {CATEGORIES.map((cat) => (
+                        {categoryItems.map((cat) => (
                             <li key={cat.id}>
                                 <button
                                     onClick={() => {
@@ -154,117 +169,13 @@ export function CatalogSection({
                     ) : (
                         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
                             {visibleProducts.map((p) => (
-                                <div
+                                <ProductCard
                                     key={p.id}
-                                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)]"
-                                >
-                                    {/* Image area */}
-                                    <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] sm:h-48">
-                                        <div
-                                            className="pointer-events-none absolute inset-0 opacity-[0.35]"
-                                            style={{
-                                                backgroundImage:
-                                                    'radial-gradient(circle, rgba(46,111,143,0.2) 1px, transparent 1px)',
-                                                backgroundSize: '14px 14px',
-                                            }}
-                                        />
-                                        <span className="pointer-events-none absolute right-2 bottom-2 text-[9px] font-black tracking-widest text-[#2E6F8F]/20 uppercase select-none">
-                                            #{String(p.id).padStart(4, '0')}
-                                        </span>
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#2E6F8F]/10 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-2xl">
-                                            <ShoppingCart
-                                                size={20}
-                                                className="text-[#2E6F8F]/30 sm:hidden"
-                                            />
-                                            <ShoppingCart
-                                                size={26}
-                                                className="hidden text-[#2E6F8F]/30 sm:block"
-                                            />
-                                        </div>
-                                        {p.tag && (
-                                            <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                                                <TagBadge tag={p.tag} />
-                                            </div>
-                                        )}
-                                        <button
-                                            onClick={() => toggleWishlist(p.id)}
-                                            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm transition-all hover:scale-110 active:scale-90 sm:top-3 sm:right-3 sm:h-7 sm:w-7"
-                                        >
-                                            <Heart
-                                                size={11}
-                                                className={`transition-transform ${
-                                                    wishlist.includes(p.id)
-                                                        ? 'scale-110 fill-red-500 text-red-500'
-                                                        : 'text-[#0D2535]/30'
-                                                }`}
-                                            />
-                                        </button>
-                                    </div>
-
-                                    {/* Info */}
-                                    <div className="flex flex-1 flex-col p-3 sm:p-4">
-                                        <div className="mb-1 flex items-center justify-between gap-1">
-                                            <p className="text-[9px] font-black tracking-widest text-[#2E6F8F] uppercase sm:text-[10px]">
-                                                {p.brand}
-                                            </p>
-                                            <p className="truncate text-[9px] text-[#0D2535]/30 sm:text-[10px]">
-                                                {p.category}
-                                            </p>
-                                        </div>
-
-                                        <p className="mb-1.5 line-clamp-2 text-[12px] leading-snug font-bold text-[#0D2535] sm:mb-2 sm:text-[13px]">
-                                            {p.name}
-                                        </p>
-
-                                        <div className="mb-2 flex items-center gap-1 sm:mb-3 sm:gap-1.5">
-                                            <StarRating rating={p.rating} />
-                                            <span className="text-[10px] text-[#0D2535]/35 sm:text-[11px]">
-                                                ({p.reviews})
-                                            </span>
-                                        </div>
-
-                                        <p className="mb-3 hidden text-[11px] leading-relaxed text-[#0D2535]/40 sm:block">
-                                            Compatible with most{' '}
-                                            {p.category.toLowerCase()}{' '}
-                                            applications.
-                                        </p>
-
-                                        <div className="mt-auto flex items-center justify-between border-t border-[#F0F7FB] pt-2.5 sm:pt-3">
-                                            <div className="min-w-0">
-                                                <span className="text-sm font-black text-[#0D2535] sm:text-base">
-                                                    ${p.price.toFixed(2)}
-                                                </span>
-                                                {p.originalPrice && (
-                                                    <>
-                                                        <span className="ml-1 text-[10px] text-[#0D2535]/30 line-through sm:ml-1.5 sm:text-xs">
-                                                            $
-                                                            {p.originalPrice.toFixed(
-                                                                2,
-                                                            )}
-                                                        </span>
-                                                        <span className="ml-1 rounded bg-red-50 px-1 py-px text-[9px] font-black text-red-500">
-                                                            -
-                                                            {Math.round(
-                                                                (1 -
-                                                                    p.price /
-                                                                        p.originalPrice) *
-                                                                    100,
-                                                            )}
-                                                            %
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                            <button
-                                                onClick={onAddToCart}
-                                                className="flex shrink-0 items-center gap-1 rounded-full bg-[#2E6F8F] px-2.5 py-1.5 text-[10px] font-black text-white transition-all hover:bg-[#1E5A7A] active:scale-90 sm:gap-1.5 sm:px-3 sm:text-[11px]"
-                                            >
-                                                <ShoppingCart size={10} />
-                                                Add
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                    product={p}
+                                    isWishlisted={wishlistSet.has(p.id)}
+                                    onAddToCart={onAddToCart}
+                                    onToggleWishlist={toggleWishlist}
+                                />
                             ))}
                         </div>
                     )}
@@ -286,3 +197,131 @@ export function CatalogSection({
         </section>
     );
 }
+
+interface ProductCardProps {
+    product: Product;
+    isWishlisted: boolean;
+    onAddToCart: (product: Product) => void;
+    onToggleWishlist: (id: number) => void;
+}
+
+const ProductCard = memo(function ProductCard({
+    product,
+    isWishlisted,
+    onAddToCart,
+    onToggleWishlist,
+}: ProductCardProps) {
+    const discountPct =
+        product.discountPercent ??
+        (product.originalPrice
+            ? Math.round((1 - product.price / product.originalPrice) * 100)
+            : null);
+    const originalPrice = product.originalPrice;
+    const isOnSale =
+        product.tag === 'SALE' && originalPrice !== null && discountPct !== null;
+
+    return (
+        <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)]">
+            <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] sm:h-48">
+                <div className="catalog-product-pattern pointer-events-none absolute inset-0 opacity-[0.35]" />
+                <span className="pointer-events-none absolute right-2 bottom-2 text-[9px] font-black tracking-widest text-[#2E6F8F]/20 uppercase select-none">
+                    #{String(product.id).padStart(4, '0')}
+                </span>
+                {product.image ? (
+                    <img
+                        src={normalizeImageUrl(product.image) ?? undefined}
+                        alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="relative h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                ) : (
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#2E6F8F]/10 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-2xl">
+                        <ShoppingCart
+                            size={20}
+                            className="text-[#2E6F8F]/30 sm:hidden"
+                        />
+                        <ShoppingCart
+                            size={26}
+                            className="hidden text-[#2E6F8F]/30 sm:block"
+                        />
+                    </div>
+                )}
+                {product.tag && (
+                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                        <TagBadge tag={product.tag} />
+                    </div>
+                )}
+                {isOnSale && (
+                    <div className="absolute right-2 bottom-2 rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-black text-white shadow-md sm:right-3 sm:bottom-3">
+                        -{discountPct}%
+                    </div>
+                )}
+                <button
+                    onClick={() => onToggleWishlist(product.id)}
+                    className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm transition-all hover:scale-110 active:scale-90 sm:top-3 sm:right-3 sm:h-7 sm:w-7"
+                >
+                    <Heart
+                        size={11}
+                        className={`transition-transform ${
+                            isWishlisted
+                                ? 'scale-110 fill-red-500 text-red-500'
+                                : 'text-[#0D2535]/30'
+                        }`}
+                    />
+                </button>
+            </div>
+
+            <div className="flex flex-1 flex-col p-3 sm:p-4">
+                <div className="mb-1 flex items-center justify-between gap-1">
+                    <p className="text-[9px] font-black tracking-widest text-[#2E6F8F] uppercase sm:text-[10px]">
+                        {product.brand}
+                    </p>
+                    <p className="truncate text-[9px] text-[#0D2535]/30 sm:text-[10px]">
+                        {product.category}
+                    </p>
+                </div>
+
+                <p className="mb-1.5 line-clamp-2 text-[12px] leading-snug font-bold text-[#0D2535] sm:mb-2 sm:text-[13px]">
+                    {product.name}
+                </p>
+
+                <div className="mb-2 flex items-center gap-1 sm:mb-3 sm:gap-1.5">
+                    <StarRating rating={product.rating} />
+                    <span className="text-[10px] text-[#0D2535]/35 sm:text-[11px]">
+                        ({product.reviews})
+                    </span>
+                </div>
+
+                <p className="mb-3 hidden text-[11px] leading-relaxed text-[#0D2535]/40 sm:block">
+                    Compatible with most {product.category.toLowerCase()}{' '}
+                    applications.
+                </p>
+
+                <div className="mt-auto flex items-center justify-between border-t border-[#F0F7FB] pt-2.5 sm:pt-3">
+                    <div className="min-w-0">
+                        <span
+                            className={`text-sm font-black sm:text-base ${
+                                isOnSale ? 'text-red-500' : 'text-[#0D2535]'
+                            }`}
+                        >
+                            ${product.price.toFixed(2)}
+                        </span>
+                        {isOnSale && (
+                            <span className="ml-1.5 text-[11px] font-bold text-[#0D2535]/35 line-through sm:text-xs">
+                                ${originalPrice.toFixed(2)}
+                            </span>
+                        )}
+                    </div>
+                    <button
+                        onClick={() => onAddToCart(product)}
+                        className="flex shrink-0 items-center gap-1 rounded-full bg-[#2E6F8F] px-2.5 py-1.5 text-[10px] font-black text-white transition-all hover:bg-[#1E5A7A] active:scale-90 sm:gap-1.5 sm:px-3 sm:text-[11px]"
+                    >
+                        <ShoppingCart size={10} />
+                        Add
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});

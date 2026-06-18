@@ -25,7 +25,7 @@ class StoreBannerRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['required', 'string', 'max:255'],
-            'image' => ['required', 'string', 'max:255'],
+            'image' => ['required', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
         ];
     }
 }

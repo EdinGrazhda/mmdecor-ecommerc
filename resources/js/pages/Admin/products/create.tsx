@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 
 interface Category {
     id: number;
@@ -14,21 +15,34 @@ export default function Create({ categories }: CreateProps) {
     const { data, setData, post, processing, errors } = useForm({
         product_id: '', // SKU
         name: '',
-        image: '',
+        image: null as File | null,
         price: '',
         stock: '',
         category_id: '',
     });
+    const previewUrl = useMemo(
+        () => (data.image ? URL.createObjectURL(data.image) : null),
+        [data.image],
+    );
+
+    useEffect(
+        () => () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        },
+        [previewUrl],
+    );
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post('/admin/products');
+        post('/admin/products', { forceFormData: true });
     }
 
     return (
         <>
             <Head title="Admin - Create Product" />
-            <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex items-center gap-4 border-b border-[#D1E8F2]/60 pb-6 mb-8">
                     <Link
@@ -117,23 +131,32 @@ export default function Create({ categories }: CreateProps) {
                             )}
                         </div>
 
-                        {/* Image URL */}
+                        {/* Image */}
                         <div>
                             <label htmlFor="image" className="block text-sm font-black text-[#0D2535]">
-                                Image Path or URL
+                                Product Image
                             </label>
                             <input
                                 id="image"
-                                type="text"
-                                value={data.image}
-                                onChange={(e) => setData('image', e.target.value)}
+                                type="file"
+                                accept="image/webp,image/png,image/jpeg,image/avif"
+                                onChange={(e) => setData('image', e.target.files?.[0] ?? null)}
                                 className={`mt-1.5 w-full rounded-xl border ${
                                     errors.image ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
                                 } bg-white px-4 py-3 text-sm font-medium text-[#0D2535] focus:outline-none`}
-                                placeholder="e.g., /images/product-01.jpg"
                             />
+                            <p className="mt-1.5 text-xs text-[#0D2535]/45">
+                                Upload JPG, PNG, AVIF, or WebP. The storefront serves an optimized WebP conversion.
+                            </p>
                             {errors.image && (
                                 <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.image}</p>
+                            )}
+                            {previewUrl && (
+                                <img
+                                    src={previewUrl}
+                                    alt="Product preview"
+                                    className="mt-3 h-32 w-32 rounded-xl border border-[#D1E8F2] object-cover"
+                                />
                             )}
                         </div>
 

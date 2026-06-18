@@ -1,8 +1,10 @@
+import { memo } from 'react';
+
 interface TagBadgeProps {
     tag: string;
 }
 
-export function TagBadge({ tag }: TagBadgeProps) {
+export const TagBadge = memo(function TagBadge({ tag }: TagBadgeProps) {
     const styles: Record<string, string> = {
         SALE: 'bg-red-500 text-white ring-1 ring-red-400/50',
         BESTSELLER: 'bg-[#2E6F8F] text-white ring-1 ring-[#2E6F8F]/50',
@@ -15,4 +17,4 @@ export function TagBadge({ tag }: TagBadgeProps) {
             {tag}
         </span>
     );
-}
+});

@@ -8,6 +8,7 @@ use App\Http\Requests\API\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -61,7 +62,14 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         try {
-            $product = Product::create($request->validated());
+            $validated = $request->validated();
+
+            $product = Product::create([
+                ...collect($validated)->except('image')->all(),
+                'image' => '',
+            ]);
+
+            $this->attachImage($product, $request->file('image'));
 
             $this->clearProductCache();
 
@@ -108,7 +116,11 @@ class ProductController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
-            $product->update($request->validated());
+            $validated = $request->validated();
+
+            $product->update(collect($validated)->except('image')->all());
+
+            $this->attachImage($product, $request->file('image'));
 
             $this->clearProductCache();
 
@@ -160,5 +172,19 @@ class ProductController extends Controller
     private function clearProductCache(): void
     {
         Cache::flush();
+    }
+
+    private function attachImage(Product $product, ?UploadedFile $image): void
+    {
+        if (! $image) {
+            return;
+        }
+
+        $product
+            ->addMedia($image)
+            ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
+            ->toMediaCollection('images');
+
+        $product->syncImageColumnFromMedia();
     }
 }

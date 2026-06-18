@@ -8,6 +8,7 @@ use App\Http\Requests\API\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -54,7 +55,14 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        Product::create($request->validated());
+        $validated = $request->validated();
+
+        $product = Product::create([
+            ...collect($validated)->except('image')->all(),
+            'image' => '',
+        ]);
+
+        $this->attachImage($product, $request->file('image'));
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
@@ -85,7 +93,11 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update($request->validated());
+        $validated = $request->validated();
+
+        $product->update(collect($validated)->except('image')->all());
+
+        $this->attachImage($product, $request->file('image'));
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
@@ -98,5 +110,19 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    private function attachImage(Product $product, ?UploadedFile $image): void
+    {
+        if (! $image) {
+            return;
+        }
+
+        $product
+            ->addMedia($image)
+            ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
+            ->toMediaCollection('images');
+
+        $product->syncImageColumnFromMedia();
     }
 }

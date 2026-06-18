@@ -1,27 +1,35 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { ChevronRight, Wrench } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/media';
 import { HERO_SLIDES } from './data';
 import { StarRating } from './StarRating';
+import type { Banner, Campaign, Product } from './types';
 
 interface HeroCarouselProps {
-    onAddToCart: () => void;
+    banners?: Banner[];
+    campaigns?: Campaign[];
+    products?: Product[];
+    onAddToCart: (product: Product) => void;
 }
 
-export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
+export const HeroCarousel = memo(function HeroCarousel({
+    banners = [],
+    campaigns = [],
+    products = [],
+    onAddToCart,
+}: HeroCarouselProps) {
+    const slides = buildSlides(
+        Array.isArray(banners) ? banners : [],
+        Array.isArray(campaigns) ? campaigns : [],
+        Array.isArray(products) ? products : [],
+    );
     const [slide, setSlide] = useState(0);
-    const current = HERO_SLIDES[slide];
+    const current = slides[slide] ?? slides[0];
 
     return (
         <section className="relative overflow-hidden bg-[#0D2535]">
             {/* Grid texture */}
-            <div
-                className="pointer-events-none absolute inset-0 opacity-[0.035]"
-                style={{
-                    backgroundImage:
-                        'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
-                    backgroundSize: '52px 52px',
-                }}
-            />
+            <div className="hero-grid-pattern pointer-events-none absolute inset-0 opacity-[0.035]" />
             {/* Blue accent stripe */}
             <div className="absolute top-0 right-0 bottom-0 w-1.5 bg-[#2E6F8F]" />
 
@@ -79,7 +87,7 @@ export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
                     <div className="flex flex-wrap items-center gap-3">
                         <button
                             className="group/btn flex items-center gap-2 rounded-lg bg-[#2E6F8F] px-6 py-3 text-sm font-black tracking-wide text-white transition-all hover:bg-[#3A86AB] active:scale-95"
-                            onClick={onAddToCart}
+                            onClick={() => current.featured.product && onAddToCart(current.featured.product)}
                         >
                             {current.cta}
                             <ChevronRight
@@ -108,17 +116,26 @@ export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
 
                         {/* Image area */}
                         <div className="relative mb-4 flex h-32 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#163345] to-[#1e5470]">
-                            <div
-                                className="pointer-events-none absolute inset-0 opacity-[0.25]"
-                                style={{
-                                    backgroundImage:
-                                        'radial-gradient(circle, rgba(255,255,255,0.18) 1px, transparent 1px)',
-                                    backgroundSize: '9px 9px',
-                                }}
-                            />
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/10 ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-105">
-                                <Wrench size={26} className="text-white/50" />
-                            </div>
+                            <div className="hero-product-pattern pointer-events-none absolute inset-0 opacity-[0.25]" />
+                            {current.featured.image ? (
+                                <img
+                                    src={normalizeImageUrl(
+                                        current.featured.image,
+                                    ) ?? undefined}
+                                    alt={current.featured.name}
+                                    loading="eager"
+                                    fetchPriority="high"
+                                    decoding="async"
+                                    className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                            ) : (
+                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/10 ring-1 ring-white/10 transition-transform duration-500 group-hover:scale-105">
+                                    <Wrench
+                                        size={26}
+                                        className="text-white/50"
+                                    />
+                                </div>
+                            )}
                             <span className="absolute right-2.5 bottom-2 text-[9px] font-black tracking-[0.18em] text-white/20 uppercase select-none">
                                 {current.featured.brand}
                             </span>
@@ -180,7 +197,7 @@ export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
                         {/* Add to Cart */}
                         <button
                             className="mb-2 w-full rounded-lg bg-[#2E6F8F] py-2.5 text-sm font-black text-white transition-all hover:bg-[#3A86AB] active:scale-[0.98]"
-                            onClick={onAddToCart}
+                            onClick={() => current.featured.product && onAddToCart(current.featured.product)}
                         >
                             Add to Cart
                         </button>
@@ -195,7 +212,7 @@ export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
 
             {/* Slide indicators */}
             <div className="flex flex-wrap items-center justify-center gap-2 px-4 pb-6">
-                {HERO_SLIDES.map((s, i) => (
+                {slides.map((s, i) => (
                     <button
                         key={i}
                         onClick={() => setSlide(i)}
@@ -214,4 +231,129 @@ export function HeroCarousel({ onAddToCart }: HeroCarouselProps) {
             </div>
         </section>
     );
+});
+
+type HeroFeatured = {
+    product?: Product;
+    name: string;
+    brand: string;
+    image?: string | null;
+    price: number;
+    originalPrice: number;
+    rating: number;
+    reviews: number;
+    fitment: string;
+    discountPct: number;
+};
+
+type HeroDisplaySlide = {
+    eyebrow: string;
+    title: string;
+    sub: string;
+    cta: string;
+    ctaAlt: string;
+    chips: string[];
+    slideLabel: string;
+    featured: HeroFeatured;
+};
+
+function buildSlides(
+    banners: Banner[],
+    campaigns: Campaign[],
+    products: Product[],
+): HeroDisplaySlide[] {
+    const campaignSlides = campaigns
+        .filter((campaign) => campaign.product)
+        .slice(0, 3)
+        .map((campaign) => {
+            const product = campaign.product as Product;
+            const originalPrice = product.originalPrice ?? product.price;
+
+            return {
+                eyebrow: `${campaign.price}% off active campaign`,
+                title: campaign.campaing_name,
+                sub: campaign.description,
+                cta: 'Shop Campaign',
+                ctaAlt: 'Browse All Parts',
+                chips: [product.category, product.brand, 'In Stock'].filter(
+                    Boolean,
+                ),
+                slideLabel: campaign.campaing_name,
+                featured: toFeaturedProduct(product, originalPrice),
+            };
+        });
+
+    if (banners.length > 0) {
+        return banners.slice(0, 3).map((banner, index) => {
+            const product = products[index % Math.max(products.length, 1)];
+            const fallback = HERO_SLIDES[index % HERO_SLIDES.length];
+
+            return {
+                eyebrow: 'Featured Store Banner',
+                title: banner.title,
+                sub: banner.subtitle,
+                cta: 'Shop Now',
+                ctaAlt: 'Browse All Parts',
+                chips: products.slice(0, 4).map((item) => item.category),
+                slideLabel: banner.title,
+                featured: product
+                    ? {
+                          ...toFeaturedProduct(
+                              product,
+                              product.originalPrice ?? product.price,
+                          ),
+                          image: banner.image ?? product.image,
+                      }
+                    : {
+                          ...fallback.featured,
+                          image: banner.image,
+                      },
+            };
+        });
+    }
+
+    if (campaignSlides.length > 0) {
+        return campaignSlides;
+    }
+
+    if (products.length > 0) {
+        return products.slice(0, 3).map((product) => ({
+            eyebrow: product.tag ? `${product.tag} product` : 'Latest product',
+            title: product.name,
+            sub: `Browse ${product.category.toLowerCase()} from ${product.brand}.`,
+            cta: 'Add Featured Product',
+            ctaAlt: 'Browse All Parts',
+            chips: [product.category, product.brand, 'In Stock'].filter(
+                Boolean,
+            ),
+            slideLabel: product.category,
+            featured: toFeaturedProduct(
+                product,
+                product.originalPrice ?? product.price,
+            ),
+        }));
+    }
+
+    return HERO_SLIDES;
+}
+
+function toFeaturedProduct(
+    product: Product,
+    originalPrice: number,
+): HeroFeatured {
+    return {
+        name: product.name,
+        product,
+        brand: product.brand,
+        image: product.image,
+        price: product.price,
+        originalPrice,
+        rating: product.rating,
+        reviews: product.reviews,
+        fitment: product.category,
+        discountPct:
+            originalPrice > product.price
+                ? Math.round((1 - product.price / originalPrice) * 100)
+                : 0,
+    };
 }

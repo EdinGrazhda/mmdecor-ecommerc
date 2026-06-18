@@ -17,7 +17,7 @@ export default function Show({ category }: ShowProps) {
     return (
         <>
             <Head title={`Admin - Category ${category.name}`} />
-            <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-[#D1E8F2]/60 pb-6 mb-8">
                     <div className="flex items-center gap-4">

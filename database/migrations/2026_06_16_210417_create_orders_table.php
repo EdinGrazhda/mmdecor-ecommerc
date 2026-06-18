@@ -23,7 +23,7 @@ return new class extends Migration
             $table->enum('customer_country', ['albania', 'kosovo', 'macedonia']);
 
             // Product Information
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained('product')->onDelete('cascade');
             $table->string('product_name'); // Store product name at time of order
             $table->decimal('product_price', 8, 2); // Store price at time of order
             $table->string('product_image')->nullable(); // Store image path at time of order

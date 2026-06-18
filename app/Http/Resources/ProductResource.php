@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Support\ResolvesMediaUrl;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,20 +16,34 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Check for active campaign
+        $today = now()->toDateString();
+
         $activeCampaign = $this->relationLoaded('campaigns')
-            ? $this->campaigns->first(fn ($c) => now()->between($c->start_date, $c->end_date))
-            : $this->campaigns()->whereDate('start_date', '<=', now())->whereDate('end_date', '>=', now())->first();
+            ? $this->campaigns
+                ->filter(fn ($campaign) => $this->campaignIsActive($campaign, $today))
+                ->sortByDesc('created_at')
+                ->first()
+            : $this->campaigns()
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
+                ->latest()
+                ->first();
+
+        $campaign = $activeCampaign ?: (
+            $this->relationLoaded('campaigns')
+                ? $this->campaigns->sortByDesc('created_at')->first()
+                : $this->campaigns()->latest()->first()
+        );
 
         $price = (float) $this->price;
         $originalPrice = null;
         $tag = null;
+        $discountPercent = null;
 
-        if ($activeCampaign) {
+        if ($campaign) {
             $originalPrice = $price;
-            // campaign price is the percentage discount (e.g. 20.00 for 20%)
-            $discountPct = (float) $activeCampaign->price;
-            $price = round($originalPrice * (1 - $discountPct / 100), 2);
+            $discountPercent = (float) $campaign->price;
+            $price = round($originalPrice * (1 - $discountPercent / 100), 2);
             $tag = 'SALE';
         } else {
             // Determine tags like BESTSELLER or NEW deterministically
@@ -52,17 +68,38 @@ class ProductResource extends JsonResource
             'product_id' => $this->product_id, // SKU
             'name' => $this->name,
             'brand' => $brand,
-            'image' => $this->image,
+            'image' => ResolvesMediaUrl::primary($this->resource, 'images', $this->image),
+            'image_thumb' => ResolvesMediaUrl::thumb($this->resource, 'images', $this->image),
             'price' => $price,
             'originalPrice' => $originalPrice,
+            'discountPercent' => $discountPercent,
             'rating' => $rating,
             'reviews' => $reviews,
             'tag' => $tag,
             'stock' => (int) $this->stock,
             'category_id' => $this->category_id,
-            'category' => $this->category?->name ?? 'Uncategorized',
+            'category' => $this->displayCategoryName($this->category?->name),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    private function campaignIsActive(mixed $campaign, string $today): bool
+    {
+        $startDate = Carbon::parse($campaign->start_date)->toDateString();
+        $endDate = Carbon::parse($campaign->end_date)->toDateString();
+
+        return $startDate <= $today && $endDate >= $today;
+    }
+
+    private function displayCategoryName(?string $name): string
+    {
+        if (! $name) {
+            return 'Uncategorized';
+        }
+
+        return str_contains(strtolower($name), 'edin')
+            ? 'Auto Parts'
+            : $name;
     }
 }
