@@ -20,7 +20,7 @@ class BannerController extends Controller
     {
         try {
             $banners = Cache::remember('banners_all', 600, function () {
-                return Banner::all();
+                return Banner::with(['product', 'product.campaigns'])->get();
             });
 
             return BannerResource::collection($banners);

@@ -25,7 +25,8 @@ class StoreBannerRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['required', 'string', 'max:255'],
-            'image' => ['required', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
+            'product_id' => ['nullable', 'exists:product,id'],
+            'image' => [$this->filled('product_id') ? 'nullable' : 'required', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
         ];
     }
 }

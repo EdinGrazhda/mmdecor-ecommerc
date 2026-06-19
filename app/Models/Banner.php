@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\CanProcessImages;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -21,7 +22,13 @@ class Banner extends Model implements HasMedia
         'title',
         'subtitle',
         'image',
+        'product_id',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 
     public function registerMediaCollections(): void
     {

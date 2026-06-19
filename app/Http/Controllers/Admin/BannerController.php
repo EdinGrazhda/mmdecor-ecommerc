@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreBannerRequest;
 use App\Http\Requests\API\UpdateBannerRequest;
 use App\Models\Banner;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Inertia\Inertia;
@@ -17,7 +18,7 @@ class BannerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Banner::query();
+        $query = Banner::query()->with('product');
 
         if ($request->filled('search')) {
             $query->where('title', 'like', '%' . $request->search . '%');
@@ -36,7 +37,9 @@ class BannerController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/banners/create');
+        return Inertia::render('Admin/banners/create', [
+            'discountedProducts' => $this->getDiscountedProducts(),
+        ]);
     }
 
     /**
@@ -51,7 +54,14 @@ class BannerController extends Controller
             'image' => '',
         ]);
 
-        $this->attachImage($banner, $request->file('image'));
+        if ($request->hasFile('image')) {
+            $this->attachImage($banner, $request->file('image'));
+        } elseif ($banner->product_id) {
+            $product = Product::find($banner->product_id);
+            if ($product?->image) {
+                $banner->forceFill(['image' => $product->image])->saveQuietly();
+            }
+        }
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner created successfully.');
     }
@@ -62,7 +72,7 @@ class BannerController extends Controller
     public function show(Banner $banner)
     {
         return Inertia::render('Admin/banners/show', [
-            'banner' => $banner,
+            'banner' => $banner->load('product'),
         ]);
     }
 
@@ -72,7 +82,8 @@ class BannerController extends Controller
     public function edit(Banner $banner)
     {
         return Inertia::render('Admin/banners/edit', [
-            'banner' => $banner,
+            'banner' => $banner->load('product'),
+            'discountedProducts' => $this->getDiscountedProducts(),
         ]);
     }
 
@@ -85,7 +96,21 @@ class BannerController extends Controller
 
         $banner->update(collect($validated)->except('image')->all());
 
-        $this->attachImage($banner, $request->file('image'));
+        if ($request->hasFile('image')) {
+            $this->attachImage($banner, $request->file('image'));
+        } elseif ($banner->product_id && !$banner->getFirstMedia('images')) {
+            $product = Product::find($banner->product_id);
+            if ($product?->image) {
+                $banner->forceFill(['image' => $product->image])->saveQuietly();
+            }
+        } elseif (array_key_exists('product_id', $validated) && !$validated['product_id']) {
+            // product cleared — keep existing image as-is
+        } elseif ($banner->fresh()->product_id && !$request->hasFile('image')) {
+            $product = Product::find($banner->fresh()->product_id);
+            if ($product?->image && !$banner->getFirstMedia('images')) {
+                $banner->forceFill(['image' => $product->image])->saveQuietly();
+            }
+        }
 
         return redirect()->route('admin.banners.index')->with('success', 'Banner updated successfully.');
     }
@@ -112,5 +137,18 @@ class BannerController extends Controller
             ->toMediaCollection('images');
 
         $banner->syncImageColumnFromMedia();
+    }
+
+    private function getDiscountedProducts(): \Illuminate\Support\Collection
+    {
+        return Product::whereHas('campaigns')
+            ->with(['campaigns' => fn ($q) => $q->latest()->limit(1)])
+            ->get()
+            ->map(fn (Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'image' => $product->image,
+                'discount' => (int) optional($product->campaigns->first())->price,
+            ]);
     }
 }

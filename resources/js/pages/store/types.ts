@@ -53,6 +53,8 @@ export interface Banner {
     subtitle: string;
     image: string | null;
     image_thumb?: string | null;
+    product_id?: number | null;
+    product?: Product | null;
 }
 
 export interface Campaign {

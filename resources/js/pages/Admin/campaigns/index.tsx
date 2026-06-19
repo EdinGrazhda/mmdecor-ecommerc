@@ -9,7 +9,7 @@ interface Product {
 
 interface Campaign {
     id: number;
-    campaing_name: string;
+    campaign_name: string;
     description: string;
     price: number | string;
     start_date: string;
@@ -108,7 +108,7 @@ export default function Index({ campaigns, filters }: IndexProps) {
                                     campaigns.data.map((campaign) => (
                                         <tr key={campaign.id} className="transition-colors hover:bg-[#F7FAFB]/50">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold">{campaign.campaing_name}</div>
+                                                <div className="font-bold">{campaign.campaign_name}</div>
                                                 <div className="max-w-xs truncate text-xs text-[#0D2535]/50">
                                                     {campaign.description}
                                                 </div>

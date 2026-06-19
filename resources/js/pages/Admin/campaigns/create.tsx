@@ -14,7 +14,7 @@ interface CreateProps {
 export default function Create({ products }: CreateProps) {
     const today = new Date().toISOString().slice(0, 10);
     const { data, setData, post, processing, errors } = useForm({
-        campaing_name: '',
+        campaign_name: '',
         description: '',
         price: '',
         start_date: today,
@@ -61,20 +61,20 @@ export default function Create({ products }: CreateProps) {
                 <div className="rounded-2xl border border-[#2E6F8F]/15 bg-white p-6 shadow-sm">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="campaing_name" className="block text-sm font-black text-[#0D2535]">
+                            <label htmlFor="campaign_name" className="block text-sm font-black text-[#0D2535]">
                                 Campaign Name
                             </label>
                             <input
-                                id="campaing_name"
+                                id="campaign_name"
                                 type="text"
-                                value={data.campaing_name}
-                                onChange={(e) => setData('campaing_name', e.target.value)}
+                                value={data.campaign_name}
+                                onChange={(e) => setData('campaign_name', e.target.value)}
                                 className={`mt-1.5 w-full rounded-xl border ${
-                                    errors.campaing_name ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
+                                    errors.campaign_name ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
                                 } bg-white px-4 py-3 text-sm font-medium text-[#0D2535] focus:outline-none`}
                                 placeholder="e.g., Summer Sale 2026"
                             />
-                            {errors.campaing_name && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.campaing_name}</p>}
+                            {errors.campaign_name && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.campaign_name}</p>}
                         </div>
 
                         <div>

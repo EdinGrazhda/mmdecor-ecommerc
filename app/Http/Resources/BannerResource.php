@@ -21,6 +21,8 @@ class BannerResource extends JsonResource
             'subtitle' => $this->subtitle,
             'image' => ResolvesMediaUrl::primary($this->resource, 'images', $this->image),
             'image_thumb' => ResolvesMediaUrl::thumb($this->resource, 'images', $this->image),
+            'product_id' => $this->product_id,
+            'product' => $this->whenLoaded('product', fn () => new ProductResource($this->product)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

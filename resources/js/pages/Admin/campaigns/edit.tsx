@@ -4,11 +4,12 @@ import { ArrowLeft, Save } from 'lucide-react';
 interface Product {
     id: number;
     name: string;
+    price: number | string;
 }
 
 interface Campaign {
     id: number;
-    campaing_name: string;
+    campaign_name: string;
     description: string;
     price: number | string;
     start_date: string;
@@ -23,13 +24,26 @@ interface EditProps {
 
 export default function Edit({ campaign, products }: EditProps) {
     const { data, setData, put, processing, errors } = useForm({
-        campaing_name: campaign.campaing_name,
+        campaign_name: campaign.campaign_name,
         description: campaign.description,
         price: String(campaign.price),
         start_date: campaign.start_date,
         end_date: campaign.end_date,
         product_id: String(campaign.product_id),
     });
+
+    const selectedProduct = products.find(
+        (product) => String(product.id) === String(data.product_id),
+    );
+    const originalPrice = selectedProduct ? Number(selectedProduct.price) : null;
+    const discountPercent = Number(data.price);
+    const hasPricePreview =
+        originalPrice !== null &&
+        Number.isFinite(originalPrice) &&
+        Number.isFinite(discountPercent);
+    const discountedPrice = hasPricePreview
+        ? originalPrice * (1 - discountPercent / 100)
+        : null;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -38,7 +52,7 @@ export default function Edit({ campaign, products }: EditProps) {
 
     return (
         <>
-            <Head title={`Admin - Edit ${campaign.campaing_name}`} />
+            <Head title={`Admin - Edit ${campaign.campaign_name}`} />
             <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-8 flex items-center gap-4 border-b border-[#D1E8F2]/60 pb-6">
                     <Link
@@ -58,19 +72,19 @@ export default function Edit({ campaign, products }: EditProps) {
                 <div className="rounded-2xl border border-[#2E6F8F]/15 bg-white p-6 shadow-sm">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="campaing_name" className="block text-sm font-black text-[#0D2535]">
+                            <label htmlFor="campaign_name" className="block text-sm font-black text-[#0D2535]">
                                 Campaign Name
                             </label>
                             <input
-                                id="campaing_name"
+                                id="campaign_name"
                                 type="text"
-                                value={data.campaing_name}
-                                onChange={(e) => setData('campaing_name', e.target.value)}
+                                value={data.campaign_name}
+                                onChange={(e) => setData('campaign_name', e.target.value)}
                                 className={`mt-1.5 w-full rounded-xl border ${
-                                    errors.campaing_name ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
+                                    errors.campaign_name ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
                                 } bg-white px-4 py-3 text-sm font-medium text-[#0D2535] focus:outline-none`}
                             />
-                            {errors.campaing_name && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.campaing_name}</p>}
+                            {errors.campaign_name && <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.campaign_name}</p>}
                         </div>
 
                         <div>
@@ -131,6 +145,24 @@ export default function Edit({ campaign, products }: EditProps) {
                             </div>
                         </div>
 
+                        {selectedProduct && (
+                            <div className="grid gap-4 rounded-2xl border border-[#D1E8F2] bg-[#F7FAFB] p-4 sm:grid-cols-3">
+                                <PricePreviewItem
+                                    label="Original Price"
+                                    value={formatCurrency(originalPrice)}
+                                />
+                                <PricePreviewItem
+                                    label="Discount"
+                                    value={`${Number.isFinite(discountPercent) ? discountPercent : 0}%`}
+                                />
+                                <PricePreviewItem
+                                    label="Campaign Price"
+                                    value={discountedPrice !== null ? formatCurrency(discountedPrice) : '-'}
+                                    highlight
+                                />
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label htmlFor="start_date" className="block text-sm font-black text-[#0D2535]">
@@ -186,6 +218,30 @@ export default function Edit({ campaign, products }: EditProps) {
             </div>
         </>
     );
+}
+
+function PricePreviewItem({
+    label,
+    value,
+    highlight = false,
+}: {
+    label: string;
+    value: string;
+    highlight?: boolean;
+}) {
+    return (
+        <div>
+            <p className="text-xs font-black tracking-wide text-[#2E6F8F] uppercase">{label}</p>
+            <p className={`mt-1 text-lg font-black ${highlight ? 'text-emerald-600' : 'text-[#0D2535]'}`}>
+                {value}
+            </p>
+        </div>
+    );
+}
+
+function formatCurrency(value: number | null) {
+    if (value === null || !Number.isFinite(value)) return '-';
+    return `$${Math.max(value, 0).toFixed(2)}`;
 }
 
 Edit.layout = {

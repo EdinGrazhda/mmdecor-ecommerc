@@ -56,20 +56,22 @@ export const HeroCarousel = memo(function HeroCarousel({
                     </p>
 
                     {/* Starting price strip */}
-                    <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-semibold tracking-wide text-white/40 uppercase">
-                            Starting from
-                        </span>
-                        <span className="text-base font-black text-white">
-                            ${current.featured.price.toFixed(2)}
-                        </span>
-                        <span className="text-[12px] text-white/30 line-through">
-                            ${current.featured.originalPrice.toFixed(2)}
-                        </span>
-                        <span className="rounded bg-red-500 px-1.5 py-px text-[10px] font-black text-white">
-                            −{current.featured.discountPct}%
-                        </span>
-                    </div>
+                    {!current.isBanner && (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-semibold tracking-wide text-white/40 uppercase">
+                                Starting from
+                            </span>
+                            <span className="text-base font-black text-white">
+                                ${current.featured.price.toFixed(2)}
+                            </span>
+                            <span className="text-[12px] text-white/30 line-through">
+                                ${current.featured.originalPrice.toFixed(2)}
+                            </span>
+                            <span className="rounded bg-red-500 px-1.5 py-px text-[10px] font-black text-white">
+                                −{current.featured.discountPct}%
+                            </span>
+                        </div>
+                    )}
 
                     {/* Category quick chips */}
                     <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
@@ -108,14 +110,16 @@ export const HeroCarousel = memo(function HeroCarousel({
                 <div className="mx-auto mt-8 w-full max-w-xs md:mx-0 md:mt-0 md:w-[240px] md:shrink-0 lg:w-[280px] xl:w-[296px]">
                     <div className="group relative rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.085]">
                         {/* Discount corner badge */}
-                        <div className="absolute -top-3 -right-3 flex h-12 w-12 flex-col items-center justify-center rounded-full bg-red-500 shadow-lg ring-2 ring-[#0D2535]">
-                            <span className="text-[11px] leading-none font-black text-white">
-                                −{current.featured.discountPct}%
-                            </span>
-                            <span className="text-[8px] font-bold tracking-wide text-red-200 uppercase">
-                                off
-                            </span>
-                        </div>
+                        {!current.isBanner && (
+                            <div className="absolute -top-3 -right-3 flex h-12 w-12 flex-col items-center justify-center rounded-full bg-red-500 shadow-lg ring-2 ring-[#0D2535]">
+                                <span className="text-[11px] leading-none font-black text-white">
+                                    −{current.featured.discountPct}%
+                                </span>
+                                <span className="text-[8px] font-bold tracking-wide text-red-200 uppercase">
+                                    off
+                                </span>
+                            </div>
+                        )}
 
                         {/* Image area */}
                         <div className="relative mb-4 flex h-32 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#163345] to-[#1e5470]">
@@ -163,41 +167,47 @@ export const HeroCarousel = memo(function HeroCarousel({
                         </p>
 
                         {/* Fitment */}
-                        <p className="mb-2.5 text-[11px] text-white/35">
-                            {current.featured.fitment}
-                        </p>
+                        {!current.isBanner && (
+                            <p className="mb-2.5 text-[11px] text-white/35">
+                                {current.featured.fitment}
+                            </p>
+                        )}
 
                         {/* Rating */}
-                        <div className="mb-3 flex items-center gap-1">
-                            <StarRating
-                                rating={current.featured.rating}
-                                variant="amber"
-                                size={11}
-                            />
-                            <span className="ml-1 text-[11px] font-bold text-white/55">
-                                {current.featured.rating}
-                            </span>
-                            <span className="text-[11px] text-white/30">
-                                ({current.featured.reviews.toLocaleString()})
-                            </span>
-                        </div>
+                        {!current.isBanner && (
+                            <div className="mb-3 flex items-center gap-1">
+                                <StarRating
+                                    rating={current.featured.rating}
+                                    variant="amber"
+                                    size={11}
+                                />
+                                <span className="ml-1 text-[11px] font-bold text-white/55">
+                                    {current.featured.rating}
+                                </span>
+                                <span className="text-[11px] text-white/30">
+                                    ({current.featured.reviews.toLocaleString()})
+                                </span>
+                            </div>
+                        )}
 
                         {/* Price row */}
-                        <div className="mb-4 flex items-end gap-2 border-t border-white/10 pt-3">
-                            <span className="text-2xl font-black text-white">
-                                ${current.featured.price.toFixed(2)}
-                            </span>
-                            <span className="mb-0.5 text-sm text-white/30 line-through">
-                                ${current.featured.originalPrice.toFixed(2)}
-                            </span>
-                            <span className="mb-0.5 ml-auto rounded bg-emerald-600/70 px-1.5 py-px text-[10px] font-black text-emerald-200">
-                                SAVE $
-                                {(
-                                    current.featured.originalPrice -
-                                    current.featured.price
-                                ).toFixed(0)}
-                            </span>
-                        </div>
+                        {!current.isBanner && (
+                            <div className="mb-4 flex items-end gap-2 border-t border-white/10 pt-3">
+                                <span className="text-2xl font-black text-white">
+                                    ${current.featured.price.toFixed(2)}
+                                </span>
+                                <span className="mb-0.5 text-sm text-white/30 line-through">
+                                    ${current.featured.originalPrice.toFixed(2)}
+                                </span>
+                                <span className="mb-0.5 ml-auto rounded bg-emerald-600/70 px-1.5 py-px text-[10px] font-black text-emerald-200">
+                                    SAVE $
+                                    {(
+                                        current.featured.originalPrice -
+                                        current.featured.price
+                                    ).toFixed(0)}
+                                </span>
+                            </div>
+                        )}
 
                         {/* Add to Cart */}
                         <button
@@ -263,6 +273,7 @@ type HeroDisplaySlide = {
     chips: string[];
     slideLabel: string;
     featured: HeroFeatured;
+    isBanner?: boolean;
 };
 
 function buildSlides(
@@ -293,7 +304,9 @@ function buildSlides(
 
     if (banners.length > 0) {
         return banners.slice(0, 3).map((banner, index) => {
-            const product = products[index % Math.max(products.length, 1)];
+            const linkedProduct = banner.product ?? null;
+            const fallbackProduct = products[index % Math.max(products.length, 1)];
+            const product = linkedProduct ?? fallbackProduct;
             const fallback = HERO_SLIDES[index % HERO_SLIDES.length];
 
             return {
@@ -304,6 +317,7 @@ function buildSlides(
                 ctaAlt: 'Browse All Parts',
                 chips: products.slice(0, 4).map((item) => item.category),
                 slideLabel: banner.title,
+                isBanner: !linkedProduct,
                 featured: product
                     ? {
                           ...toFeaturedProduct(

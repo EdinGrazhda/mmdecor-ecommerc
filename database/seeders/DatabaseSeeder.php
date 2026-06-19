@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
 
         // Create campaigns with discounts
         Campaign::create([
-            'campaing_name' => 'Summer Sale',
+            'campaign_name' => 'Summer Sale',
             'description' => 'Get 15% off on premium suspension parts',
             'price' => 15,
             'product_id' => $product1->id,
@@ -80,7 +80,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Campaign::create([
-            'campaing_name' => 'Interior Deals',
+            'campaign_name' => 'Interior Deals',
             'description' => 'Special discount on interior accessories',
             'price' => 20,
             'product_id' => $product2->id,

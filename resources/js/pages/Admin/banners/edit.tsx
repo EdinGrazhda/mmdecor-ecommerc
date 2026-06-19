@@ -1,29 +1,48 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import { BannerFields } from './create';
+import { BannerFields, type DiscountedProduct } from './create';
+
+interface BannerProduct {
+    id: number;
+    name: string;
+    image: string | null;
+}
 
 interface Banner {
     id: number;
     title: string;
     subtitle: string;
     image: string | null;
+    product_id: number | null;
+    product?: BannerProduct | null;
 }
 
 interface EditProps {
     banner: Banner;
+    discountedProducts: DiscountedProduct[];
 }
 
-export default function Edit({ banner }: EditProps) {
+export default function Edit({ banner, discountedProducts }: EditProps) {
     const { data, setData, post, processing, errors } = useForm({
         _method: 'put' as const,
         title: banner.title,
         subtitle: banner.subtitle,
+        product_id: (banner.product_id ?? '') as string | number,
         image: null as File | null,
     });
+
+    const selectedProduct = useMemo(
+        () => discountedProducts.find((p) => p.id === Number(data.product_id)) ?? null,
+        [data.product_id, discountedProducts],
+    );
+
     const previewUrl = useMemo(
-        () => (data.image ? URL.createObjectURL(data.image) : banner.image),
-        [banner.image, data.image],
+        () =>
+            data.image
+                ? URL.createObjectURL(data.image)
+                : selectedProduct?.image ?? banner.image,
+        [banner.image, data.image, selectedProduct],
     );
 
     useEffect(
@@ -70,6 +89,8 @@ export default function Edit({ banner }: EditProps) {
                             errors={errors}
                             setData={setData}
                             previewUrl={previewUrl}
+                            discountedProducts={discountedProducts}
+                            selectedProduct={selectedProduct}
                         />
 
                         <div className="flex justify-end gap-3 border-t border-[#F0F7FB] pt-6">

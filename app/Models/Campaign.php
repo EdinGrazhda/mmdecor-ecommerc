@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Campaign extends Model
 {
-    protected $table = 'capmaigns';
+    protected $table = 'campaigns';
 
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'campaing_name',
+        'campaign_name',
         'description',
         'price',
         'start_date',

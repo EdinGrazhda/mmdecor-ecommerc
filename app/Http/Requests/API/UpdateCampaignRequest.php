@@ -23,7 +23,7 @@ class UpdateCampaignRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'campaing_name' => ['sometimes', 'required', 'string', 'max:255'],
+            'campaign_name' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'required', 'string'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'start_date' => ['sometimes', 'required', 'date'],

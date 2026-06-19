@@ -16,7 +16,7 @@ class CampaignResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'campaing_name' => $this->campaing_name,
+            'campaign_name' => $this->campaign_name,
             'description' => $this->description,
             'price' => (float) $this->price, // percentage discount
             'start_date' => $this->start_date,

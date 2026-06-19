@@ -20,7 +20,7 @@ class CampaignController extends Controller
         $query = Campaign::query()->with('product');
 
         if ($request->filled('search')) {
-            $query->where('campaing_name', 'like', '%' . $request->search . '%');
+            $query->where('campaign_name', 'like', '%' . $request->search . '%');
         }
 
         $campaigns = $query->latest()->paginate(10)->withQueryString();
@@ -68,7 +68,7 @@ class CampaignController extends Controller
     {
         return Inertia::render('Admin/campaigns/edit', [
             'campaign' => $campaign,
-            'products' => Product::all(),
+            'products' => Product::all(['id', 'name', 'price']),
         ]);
     }
 

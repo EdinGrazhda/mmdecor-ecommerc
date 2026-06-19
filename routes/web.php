@@ -3,6 +3,7 @@
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StorefrontCartController;
 use App\Http\Controllers\WelcomeController;
@@ -22,7 +23,7 @@ Route::delete('cart/{cartItem}', [StorefrontCartController::class, 'destroy'])->
 Route::post('checkout', [StorefrontCartController::class, 'checkout'])->name('checkout.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::resource('products', App\Http\Controllers\Admin\ProductController::class);
