@@ -14,6 +14,10 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        Order::query()
+            ->whereNull('admin_viewed_at')
+            ->update(['admin_viewed_at' => now()]);
+
         $query = Order::query()->with('product');
 
         if ($request->filled('search')) {

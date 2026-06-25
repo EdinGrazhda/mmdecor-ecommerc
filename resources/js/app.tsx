@@ -98,7 +98,7 @@ function PageWithLayout({
         : {};
     const componentName = page.component;
 
-    if (componentName === 'welcome') {
+    if (componentName === 'welcome' || componentName.startsWith('store/')) {
         return child;
     }
 

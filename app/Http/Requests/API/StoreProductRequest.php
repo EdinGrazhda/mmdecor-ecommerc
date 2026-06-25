@@ -24,7 +24,9 @@ class StoreProductRequest extends FormRequest
     {
         return [
             'product_id' => ['required', 'string', 'max:255', 'unique:product,product_id'],
-            'image' => ['required', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
+            'image' => ['nullable', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
+            'images' => ['required_without:image', 'array', 'min:1', 'max:4'],
+            'images.*' => ['image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
             'name' => ['required', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],

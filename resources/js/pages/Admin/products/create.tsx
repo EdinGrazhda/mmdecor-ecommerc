@@ -15,23 +15,21 @@ export default function Create({ categories }: CreateProps) {
     const { data, setData, post, processing, errors } = useForm({
         product_id: '', // SKU
         name: '',
-        image: null as File | null,
+        images: [] as File[],
         price: '',
         stock: '',
         category_id: '',
     });
-    const previewUrl = useMemo(
-        () => (data.image ? URL.createObjectURL(data.image) : null),
-        [data.image],
+    const previewUrls = useMemo(
+        () => data.images.map((image) => URL.createObjectURL(image)),
+        [data.images],
     );
 
     useEffect(
         () => () => {
-            if (previewUrl) {
-                URL.revokeObjectURL(previewUrl);
-            }
+            previewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
         },
-        [previewUrl],
+        [previewUrls],
     );
 
     function handleSubmit(e: React.FormEvent) {
@@ -134,29 +132,35 @@ export default function Create({ categories }: CreateProps) {
                         {/* Image */}
                         <div>
                             <label htmlFor="image" className="block text-sm font-black text-[#0D2535]">
-                                Product Image
+                                Product Images
                             </label>
                             <input
                                 id="image"
                                 type="file"
+                                multiple
                                 accept="image/webp,image/png,image/jpeg,image/avif"
-                                onChange={(e) => setData('image', e.target.files?.[0] ?? null)}
+                                onChange={(e) => setData('images', Array.from(e.target.files ?? []).slice(0, 4))}
                                 className={`mt-1.5 w-full rounded-xl border ${
-                                    errors.image ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
+                                    errors.images ? 'border-red-300 focus:border-red-500' : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
                                 } bg-white px-4 py-3 text-sm font-medium text-[#0D2535] focus:outline-none`}
                             />
                             <p className="mt-1.5 text-xs text-[#0D2535]/45">
-                                Upload JPG, PNG, AVIF, or WebP. The storefront serves an optimized WebP conversion.
+                                Upload 1 to 4 JPG, PNG, AVIF, or WebP images. The first image is used as the main product image.
                             </p>
-                            {errors.image && (
-                                <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.image}</p>
+                            {errors.images && (
+                                <p className="mt-1.5 text-xs font-semibold text-red-500">{errors.images}</p>
                             )}
-                            {previewUrl && (
-                                <img
-                                    src={previewUrl}
-                                    alt="Product preview"
-                                    className="mt-3 h-32 w-32 rounded-xl border border-[#D1E8F2] object-cover"
-                                />
+                            {previewUrls.length > 0 && (
+                                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                    {previewUrls.map((previewUrl, index) => (
+                                        <img
+                                            key={previewUrl}
+                                            src={previewUrl}
+                                            alt={`Product preview ${index + 1}`}
+                                            className="aspect-square w-full rounded-xl border border-[#D1E8F2] object-cover"
+                                        />
+                                    ))}
+                                </div>
                             )}
                         </div>
 

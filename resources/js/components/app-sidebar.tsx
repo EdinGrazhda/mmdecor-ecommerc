@@ -1,5 +1,15 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, Package, Tags, Megaphone, Image, FileText } from 'lucide-react';
+import { Link, router, usePage } from '@inertiajs/react';
+import {
+    BookOpen,
+    FolderGit2,
+    LayoutGrid,
+    Package,
+    Tags,
+    Megaphone,
+    Image,
+    FileText,
+} from 'lucide-react';
+import { useEffect } from 'react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,7 +26,7 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const baseMainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
@@ -46,23 +56,50 @@ const mainNavItems: NavItem[] = [
         title: 'Orders',
         href: '/admin/orders',
         icon: FileText,
+        prefetch: false,
     },
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+    // {
+    //     title: 'Repository',
+    //     href: 'https://github.com/laravel/react-starter-kit',
+    //     icon: FolderGit2,
+    // },
+    // {
+    //     title: 'Documentation',
+    //     href: 'https://laravel.com/docs/starter-kits#react',
+    //     icon: BookOpen,
+    // },
 ];
 
 export function AppSidebar() {
+    const { admin } = usePage<{
+        admin?: { newOrdersCount?: number };
+    }>().props;
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            if (document.visibilityState !== 'visible') {
+                return;
+            }
+
+            router.reload({
+                only: ['admin'],
+                preserveScroll: true,
+                preserveState: true,
+            });
+        }, 10_000);
+
+        return () => window.clearInterval(interval);
+    }, []);
+
+    const mainNavItems = baseMainNavItems.map((item) =>
+        item.title === 'Orders'
+            ? { ...item, badge: admin?.newOrdersCount ?? 0 }
+            : item,
+    );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

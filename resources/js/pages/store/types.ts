@@ -5,15 +5,21 @@ export interface Product {
     brand: string;
     image?: string | null;
     image_thumb?: string | null;
+    images?: ProductImage[];
     price: number;
     originalPrice: number | null;
     discountPercent?: number | null;
-    rating: number;
+    rating: number | null;
     reviews: number;
     tag: string | null;
     stock?: number;
     category_id?: number;
     category: string;
+}
+
+export interface ProductImage {
+    url: string;
+    thumb: string;
 }
 
 export interface FeaturedProduct {

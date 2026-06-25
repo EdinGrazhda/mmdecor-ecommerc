@@ -54,7 +54,6 @@ class Product extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('images')
-            ->singleFile()
             ->acceptsMimeTypes([
                 'image/avif',
                 'image/jpeg',

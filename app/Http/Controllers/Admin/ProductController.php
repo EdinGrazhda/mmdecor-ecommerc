@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\StoreProductRequest;
 use App\Http\Requests\API\UpdateProductRequest;
+use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -58,11 +59,11 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         $product = Product::create([
-            ...collect($validated)->except('image')->all(),
+            ...collect($validated)->except(['image', 'images'])->all(),
             'image' => '',
         ]);
 
-        $this->attachImage($product, $request->file('image'));
+        $this->attachImages($product, $this->uploadedImages($request));
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
@@ -73,7 +74,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return Inertia::render('Admin/products/show', [
-            'product' => $product->load('category'),
+            'product' => new ProductResource($product->load(['category', 'campaigns'])),
         ]);
     }
 
@@ -83,7 +84,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         return Inertia::render('Admin/products/edit', [
-            'product' => $product,
+            'product' => new ProductResource($product->load(['category', 'campaigns'])),
             'categories' => Category::all(),
         ]);
     }
@@ -95,9 +96,12 @@ class ProductController extends Controller
     {
         $validated = $request->validated();
 
-        $product->update(collect($validated)->except('image')->all());
+        $product->update(collect($validated)->except(['image', 'images'])->all());
 
-        $this->attachImage($product, $request->file('image'));
+        if ($request->hasFile('images') || $request->hasFile('image')) {
+            $product->clearMediaCollection('images');
+            $this->attachImages($product, $this->uploadedImages($request));
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
     }
@@ -112,16 +116,35 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 
-    private function attachImage(Product $product, ?UploadedFile $image): void
+    /**
+     * @return array<int, UploadedFile>
+     */
+    private function uploadedImages(Request $request): array
     {
-        if (! $image) {
+        if ($request->hasFile('images')) {
+            return array_slice($request->file('images'), 0, 4);
+        }
+
+        $image = $request->file('image');
+
+        return $image ? [$image] : [];
+    }
+
+    /**
+     * @param array<int, UploadedFile> $images
+     */
+    private function attachImages(Product $product, array $images): void
+    {
+        if ($images === []) {
             return;
         }
 
-        $product
-            ->addMedia($image)
-            ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
-            ->toMediaCollection('images');
+        foreach ($images as $image) {
+            $product
+                ->addMedia($image)
+                ->usingName(pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME))
+                ->toMediaCollection('images');
+        }
 
         $product->syncImageColumnFromMedia();
     }

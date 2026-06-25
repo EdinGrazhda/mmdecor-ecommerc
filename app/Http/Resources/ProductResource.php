@@ -70,6 +70,7 @@ class ProductResource extends JsonResource
             'brand' => $brand,
             'image' => ResolvesMediaUrl::primary($this->resource, 'images', $this->image),
             'image_thumb' => ResolvesMediaUrl::thumb($this->resource, 'images', $this->image),
+            'images' => $this->galleryImages(),
             'price' => $price,
             'originalPrice' => $originalPrice,
             'discountPercent' => $discountPercent,
@@ -90,6 +91,38 @@ class ProductResource extends JsonResource
         $endDate = Carbon::parse($campaign->end_date)->toDateString();
 
         return $startDate <= $today && $endDate >= $today;
+    }
+
+    /**
+     * @return array<int, array{url: string, thumb: string}>
+     */
+    private function galleryImages(): array
+    {
+        $mediaItems = $this->resource->getMedia('images');
+
+        if ($mediaItems->isEmpty()) {
+            $legacy = ResolvesMediaUrl::primary($this->resource, 'images', $this->image);
+
+            return $legacy ? [['url' => $legacy, 'thumb' => $legacy]] : [];
+        }
+
+        return $mediaItems
+            ->take(4)
+            ->map(function ($media) {
+                $optimized = $media->hasGeneratedConversion('optimized')
+                    ? $media->getUrl('optimized')
+                    : $media->getUrl();
+                $thumb = $media->hasGeneratedConversion('thumb')
+                    ? $media->getUrl('thumb')
+                    : $optimized;
+
+                return [
+                    'url' => $optimized,
+                    'thumb' => $thumb,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     private function displayCategoryName(?string $name): string

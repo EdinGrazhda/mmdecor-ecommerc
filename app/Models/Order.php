@@ -32,7 +32,18 @@ class Order extends Model
         'confirmed_at',
         'shipped_at',
         'delivered_at',
+        'admin_viewed_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'confirmed_at' => 'datetime',
+            'shipped_at' => 'datetime',
+            'delivered_at' => 'datetime',
+            'admin_viewed_at' => 'datetime',
+        ];
+    }
 
     public function product()
     {

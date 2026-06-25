@@ -1,5 +1,6 @@
 import { memo, useState } from 'react';
 import { ChevronRight, Wrench } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { normalizeImageUrl } from '@/lib/media';
 import { HERO_SLIDES } from './data';
 import { StarRating } from './StarRating';
@@ -100,9 +101,21 @@ export const HeroCarousel = memo(function HeroCarousel({
                                 className="transition-transform group-hover/btn:translate-x-1"
                             />
                         </button>
-                        <button className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white/65 transition-colors hover:border-white/45 hover:text-white">
-                            {current.ctaAlt}
-                        </button>
+                        {current.featured.product ? (
+                            <Link
+                                href={`/products/${current.featured.product.id}`}
+                                className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white/65 transition-colors hover:border-white/45 hover:text-white"
+                            >
+                                {current.ctaAlt}
+                            </Link>
+                        ) : (
+                            <button
+                                type="button"
+                                className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white/65 transition-colors hover:border-white/45 hover:text-white"
+                            >
+                                {current.ctaAlt}
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -221,9 +234,21 @@ export const HeroCarousel = memo(function HeroCarousel({
                         </button>
 
                         {/* View Details */}
-                        <button className="w-full rounded-lg border border-white/15 py-2 text-[12px] font-semibold text-white/50 transition-colors hover:border-white/30 hover:text-white/80">
-                            View Details
-                        </button>
+                        {current.featured.product ? (
+                            <Link
+                                href={`/products/${current.featured.product.id}`}
+                                className="block w-full rounded-lg border border-white/15 py-2 text-center text-[12px] font-semibold text-white/50 transition-colors hover:border-white/30 hover:text-white/80"
+                            >
+                                View Details
+                            </Link>
+                        ) : (
+                            <button
+                                type="button"
+                                className="w-full rounded-lg border border-white/15 py-2 text-[12px] font-semibold text-white/50 transition-colors hover:border-white/30 hover:text-white/80"
+                            >
+                                View Details
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

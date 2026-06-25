@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { Menu, Phone, Search, ShoppingCart, Tag } from 'lucide-react';
 import { memo } from 'react';
 
@@ -26,8 +27,8 @@ export const StoreNavbar = memo(function StoreNavbar({
                             <Menu size={20} />
                         </button>
 
-                        <a
-                            href="#"
+                        <Link
+                            href="/"
                             className="flex min-w-0 shrink-0 items-center"
                         >
                             <img
@@ -35,7 +36,7 @@ export const StoreNavbar = memo(function StoreNavbar({
                                 alt="MMDECOR Auto Car Decor"
                                 className="h-9 w-auto sm:h-10"
                             />
-                        </a>
+                        </Link>
 
                         <button
                             type="button"
@@ -62,13 +63,13 @@ export const StoreNavbar = memo(function StoreNavbar({
                 </div>
 
                 <div className="hidden h-16 items-center gap-5 lg:flex">
-                    <a href="#" className="flex shrink-0 items-center">
+                    <Link href="/" className="flex shrink-0 items-center">
                         <img
                             src="/images/mmdecor.png"
                             alt="MMDECOR Auto Car Decor"
                             className="h-12 w-auto"
                         />
-                    </a>
+                    </Link>
 
                     <div className="relative flex min-w-0 flex-1 items-center">
                         <Search

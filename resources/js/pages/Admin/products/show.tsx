@@ -10,21 +10,29 @@ interface Product {
     id: number;
     product_id: string;
     image: string | null;
+    images?: Array<{ url: string; thumb: string }>;
     name: string;
     price: number | string;
     stock: number;
     category_id: number;
-    category?: Category | null;
+    category?: Category | string | null;
 }
 
 interface ShowProps {
-    product: Product;
+    product: Product | { data: Product };
 }
 
 export default function Show({ product }: ShowProps) {
+    const resolvedProduct = 'data' in product ? product.data : product;
+    const productImages = resolvedProduct.images?.length
+        ? resolvedProduct.images
+        : resolvedProduct.image
+            ? [{ url: resolvedProduct.image, thumb: resolvedProduct.image }]
+            : [];
+
     return (
         <>
-            <Head title={`Admin - ${product.name}`} />
+            <Head title={`Admin - ${resolvedProduct.name}`} />
             <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
                 <div className="mb-8 flex flex-col gap-4 border-b border-[#D1E8F2]/60 pb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -36,7 +44,7 @@ export default function Show({ product }: ShowProps) {
                         </Link>
                         <div>
                             <h1 className="text-2xl font-black text-[#0D2535] sm:text-3xl">
-                                {product.name}
+                                {resolvedProduct.name}
                             </h1>
                             <p className="mt-1 text-sm text-[#0D2535]/50">
                                 Product details and inventory overview.
@@ -44,7 +52,7 @@ export default function Show({ product }: ShowProps) {
                         </div>
                     </div>
                     <Link
-                        href={`/admin/products/${product.id}/edit`}
+                        href={`/admin/products/${resolvedProduct.id}/edit`}
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2E6F8F] px-4 py-2.5 text-sm font-black text-white transition-all hover:-translate-y-0.5 hover:bg-[#1E5A7A] hover:shadow-md active:translate-y-0"
                     >
                         <Edit2 size={16} />
@@ -54,12 +62,26 @@ export default function Show({ product }: ShowProps) {
 
                 <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
                     <section className="overflow-hidden rounded-2xl border border-[#2E6F8F]/15 bg-white shadow-sm">
-                        {product.image ? (
-                            <img
-                                src={normalizeImageUrl(product.image)}
-                                alt={product.name}
-                                className="h-80 w-full object-cover"
-                            />
+                        {productImages.length > 0 ? (
+                            <div>
+                                <img
+                                    src={normalizeImageUrl(productImages[0].url)}
+                                    alt={resolvedProduct.name}
+                                    className="h-80 w-full object-cover"
+                                />
+                                {productImages.length > 1 && (
+                                    <div className="grid grid-cols-4 gap-2 border-t border-[#F0F7FB] p-2">
+                                        {productImages.map((image, index) => (
+                                            <img
+                                                key={`${image.thumb}-${index}`}
+                                                src={normalizeImageUrl(image.thumb)}
+                                                alt={`${resolvedProduct.name} ${index + 1}`}
+                                                className="aspect-square w-full rounded-lg border border-[#D1E8F2] object-cover"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         ) : (
                             <div className="flex h-80 w-full items-center justify-center bg-[#F7FAFB] text-[#2E6F8F]/40">
                                 <Package size={44} />
@@ -72,18 +94,18 @@ export default function Show({ product }: ShowProps) {
                             Product Information
                         </h2>
                         <dl className="grid gap-5 text-sm sm:grid-cols-2">
-                            <Detail label="SKU" value={product.product_id} />
+                            <Detail label="SKU" value={resolvedProduct.product_id} />
                             <Detail
                                 label="Category"
-                                value={product.category?.name ?? 'Uncategorized'}
+                                value={typeof resolvedProduct.category === 'string' ? resolvedProduct.category : resolvedProduct.category?.name ?? 'Uncategorized'}
                             />
                             <Detail
                                 label="Price"
-                                value={`$${Number(product.price).toFixed(2)}`}
+                                value={`$${Number(resolvedProduct.price).toFixed(2)}`}
                             />
                             <Detail
                                 label="Stock"
-                                value={`${product.stock} in stock`}
+                                value={`${resolvedProduct.stock} in stock`}
                             />
                         </dl>
                     </section>

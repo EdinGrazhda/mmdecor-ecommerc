@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo, useState } from 'react';
 import { ChevronRight, Heart, Search, ShoppingCart, X } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { normalizeImageUrl } from '@/lib/media';
 import { CATEGORIES, PRODUCTS } from './data';
 import { TagBadge } from './TagBadge';
@@ -221,7 +222,13 @@ const ProductCard = memo(function ProductCard({
         product.tag === 'SALE' && originalPrice !== null && discountPct !== null;
 
     return (
-        <div className="group flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)]">
+        <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)]">
+            {/* Clickable area — image + info (not the action buttons) */}
+            <Link
+                href={`/products/${product.id}`}
+                className="flex flex-col"
+                aria-label={`View ${product.name}`}
+            >
             <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] sm:h-48">
                 <div className="catalog-product-pattern pointer-events-none absolute inset-0 opacity-[0.35]" />
                 <span className="pointer-events-none absolute right-2 bottom-2 text-[9px] font-black tracking-widest text-[#2E6F8F]/20 uppercase select-none">
@@ -257,19 +264,6 @@ const ProductCard = memo(function ProductCard({
                         -{discountPct}%
                     </div>
                 )}
-                <button
-                    onClick={() => onToggleWishlist(product.id)}
-                    className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-sm transition-all hover:scale-110 active:scale-90 sm:top-3 sm:right-3 sm:h-7 sm:w-7"
-                >
-                    <Heart
-                        size={11}
-                        className={`transition-transform ${
-                            isWishlisted
-                                ? 'scale-110 fill-red-500 text-red-500'
-                                : 'text-[#0D2535]/30'
-                        }`}
-                    />
-                </button>
             </div>
 
             <div className="flex flex-1 flex-col p-3 sm:p-4">
@@ -297,24 +291,41 @@ const ProductCard = memo(function ProductCard({
                     Compatible with most {product.category.toLowerCase()}{' '}
                     applications.
                 </p>
+            </div>
+            </Link>
 
-                <div className="mt-auto flex items-center justify-between border-t border-[#F0F7FB] pt-2.5 sm:pt-3">
-                    <div className="min-w-0">
-                        <span
-                            className={`text-sm font-black sm:text-base ${
-                                isOnSale ? 'text-red-500' : 'text-[#0D2535]'
-                            }`}
-                        >
-                            ${product.price.toFixed(2)}
+            {/* Action row — outside the Link so buttons don't trigger navigation */}
+            <div className="flex items-center justify-between border-t border-[#F0F7FB] px-3 py-2.5 sm:px-4 sm:pt-3">
+                <div className="min-w-0">
+                    <span
+                        className={`text-sm font-black sm:text-base ${
+                            isOnSale ? 'text-red-500' : 'text-[#0D2535]'
+                        }`}
+                    >
+                        ${product.price.toFixed(2)}
+                    </span>
+                    {isOnSale && (
+                        <span className="ml-1.5 text-[11px] font-bold text-[#0D2535]/35 line-through sm:text-xs">
+                            ${originalPrice.toFixed(2)}
                         </span>
-                        {isOnSale && (
-                            <span className="ml-1.5 text-[11px] font-bold text-[#0D2535]/35 line-through sm:text-xs">
-                                ${originalPrice.toFixed(2)}
-                            </span>
-                        )}
-                    </div>
+                    )}
+                </div>
+                <div className="flex items-center gap-2">
                     <button
-                        onClick={() => onAddToCart(product)}
+                        onClick={(e) => { e.stopPropagation(); onToggleWishlist(product.id); }}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EBF3F7] shadow-sm transition-all hover:scale-110 active:scale-90"
+                    >
+                        <Heart
+                            size={11}
+                            className={`transition-transform ${
+                                isWishlisted
+                                    ? 'scale-110 fill-red-500 text-red-500'
+                                    : 'text-[#0D2535]/30'
+                            }`}
+                        />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
                         className="flex shrink-0 items-center gap-1 rounded-full bg-[#2E6F8F] px-2.5 py-1.5 text-[10px] font-black text-white transition-all hover:bg-[#1E5A7A] active:scale-90 sm:gap-1.5 sm:px-3 sm:text-[11px]"
                     >
                         <ShoppingCart size={10} />
