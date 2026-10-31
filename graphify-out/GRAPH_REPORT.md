@@ -6,21 +6,21 @@
 - Unclassified: 24 file(s) not represented in the graph (top: (none) 19, .toml 1, .example 1)
 
 ## Summary
-- 4319 nodes · 6294 edges · 330 communities (280 shown, 50 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 29 edges (avg confidence: 0.89)
+- 4320 nodes · 6293 edges · 333 communities (280 shown, 53 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 38 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8c23ea1a`
+- Built from commit: `b36533e9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Illuminate\Foundation\Http\FormRequest
-- CampaignController
-- Button
+- ProductResource
+- lucide-react
 - two-factor-recovery-codes.tsx
-- app-header.tsx
+- Category
 - devDependencies
 - dependencies
 - Race Conditions
@@ -28,11 +28,11 @@
 - verify_php_project.py
 - introspect.py
 - sidebar.tsx
-- CartContext.tsx
-- dropdown-menu.tsx
+- bootstrap/app.php
+- app-header.tsx
 - AWS Security Patterns
 - two-factor-setup-modal.tsx
-- security.tsx
+- PasswordValidationRules
 - Core Python Security Patterns
 - index.ts
 - Controller
@@ -42,14 +42,14 @@
 - cn
 - Supply Chain Security
 - with
-- Product
-- API/CategoryController.php
+- App\Models\Product
+- CategoryController
 - steps
 - Order
 - Banner
 - AppServiceProvider.php
 - components.json
-- @inertiajs/react
+- campaigns/index.tsx
 - Any
 - PHPStan Compliance Guide
 - Static Analysis Tools
@@ -57,7 +57,7 @@
 - compilerOptions
 - Cloud CLI
 - User
-- sidebar.tsx
+- ProductController
 - Illuminate\Database\Schema\Blueprint
 - vite.config.ts
 - package.json
@@ -70,7 +70,7 @@
 - StorefrontCartController
 - auth.ts
 - require-dev
-- breadcrumbs.tsx
+- react
 - require
 - 2024_01_01_000000_create_passkeys_table.php
 - scripts
@@ -79,7 +79,7 @@
 - PHP Migration Strategies
 - 2026_06_16_205030_create_category_table.php
 - PHPUnit Modernization (12 → 13)
-- AppLogoIcon
+- categories/index.tsx
 - campaigns/edit.tsx
 - Active PSRs (PHP Standard Recommendations)
 - MigrateLegacyMedia.php
@@ -103,7 +103,7 @@
 - Adapter Registry Pattern
 - Copilot CLI Project Behavior Instructions
 - Laravel Expert
-- use-appearance.tsx
+- app.tsx
 - Illuminate\Database\Migrations\Migration
 - 2026_06_16_205519_create_cart_table.php
 - Illuminate\Support\Facades\Schema
@@ -136,7 +136,7 @@
 - API Platform × PHP Modernization: Edges Only
 - Detection checklist
 - Tailwind CSS development
-- Laravel Fortify Development
+- AppServiceProvider
 - Advanced query best practices
 - Events and notifications best practices
 - Migration best practices
@@ -145,7 +145,7 @@
 - Multi-Agent Modernization Pitfalls
 - PSR-15 Middleware Architecture
 - PHP Security Features by Version
-- Laravel Fortify Development
+- products/edit.tsx
 - Advanced query best practices
 - Events and notifications best practices
 - Migration best practices
@@ -214,7 +214,7 @@
 - TYPO3 Security Patterns (PHP-level)
 - Vue.js Security Patterns
 - XXE (XML External Entity) Prevention
-- app.tsx
+- react-dom
 - React Security Patterns
 - TYPO3 TypoScript and TSconfig Security
 - banners/index.tsx
@@ -245,8 +245,8 @@
 - Input Validation and Output Encoding
 - Security Logging and Monitoring Patterns
 - Symfony Security Patterns
-- API/BannerController.php
-- Setup Workflows
+- App\Http\Controllers\Controller
+- banners/show.tsx
 - Prevention Checklist
 - 1. DOM-Based XSS
 - 2. Subresource Integrity (SRI)
@@ -254,7 +254,8 @@
 - 7. Dynamic Code Execution
 - Pre-Publication Git-History Hygiene
 - What to Log
-- Setup Workflows
+- campaigns/show.tsx
+- categories/edit.tsx
 - semgrep - Static Analysis (SAST)
 - Dependency Scanning
 - SAST (Static Application Security Testing)
@@ -321,11 +322,13 @@
 - secrets.sh
 - security-audit-dispatcher.sh
 - products/show.tsx
-- FortifyServiceProvider
-- AppServiceProvider
-- SecurityTest.php
+- concurrently@^9.0.1
+- @radix-ui/react-dialog
+- @radix-ui/react-dropdown-menu
 - campaigns/create.tsx
+- @radix-ui/react-navigation-menu
 - 2026_06_16_210417_create_orders_table.php
+- @radix-ui/react-separator
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 127 edges
@@ -333,44 +336,48 @@
 3. `@inertiajs/react` - 64 edges
 4. `lucide-react` - 57 edges
 5. `Button()` - 42 edges
-6. `Product` - 35 edges
-7. `evaluate()` - 32 edges
-8. `Controller` - 31 edges
-9. `AppHeader()` - 30 edges
-10. `User` - 29 edges
+6. `evaluate()` - 32 edges
+7. `AppHeader()` - 30 edges
+8. `CWE Top 25 Most Dangerous Software Weaknesses (2025)` - 27 edges
+9. `User` - 27 edges
+10. `Banner` - 26 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `PHP Attributes` --references--> `ToolResult`  [INFERRED]
   .agents/skills/ai-sdk-development/SKILL.md → .ai/skills/php-modernization/scripts/modernize_loop.py
-- `PHP Attributes` --references--> `ToolResult`  [INFERRED]
-  .github/skills/ai-sdk-development/SKILL.md → .ai/skills/php-modernization/scripts/modernize_loop.py
-- `E. Architecture & organization` --references--> `execute()`  [INFERRED]
-  .agents/skills/infer-conventions/references/checklist.md → .ai/skills/php-modernization/scripts/modernize_loop.py
 - `Ground rules (read before you start)` --references--> `execute()`  [INFERRED]
   .agents/skills/infer-conventions/SKILL.md → .ai/skills/php-modernization/scripts/modernize_loop.py
 - `Step 2: Open-ended pass` --references--> `execute()`  [INFERRED]
   .agents/skills/infer-conventions/SKILL.md → .ai/skills/php-modernization/scripts/modernize_loop.py
+- `E. Architecture & organization` --references--> `execute()`  [INFERRED]
+  .agents/skills/infer-conventions/references/checklist.md → .ai/skills/php-modernization/scripts/modernize_loop.py
+- `PHP Attributes` --references--> `ToolResult`  [INFERRED]
+  .github/skills/ai-sdk-development/SKILL.md → .ai/skills/php-modernization/scripts/modernize_loop.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (330 total, 50 thin omitted)
+## Communities (333 total, 53 thin omitted)
 
 ### Community 0 - "Illuminate\Foundation\Http\FormRequest"
-Cohesion: 0.06
-Nodes (14): CreateNewUser, ResetUserPassword, PasswordValidationRules, ProfileValidationRules, StoreBannerRequest, StoreCategoryRequest, StoreProductRequest, UpdateBannerRequest (+6 more)
+Cohesion: 0.08
+Nodes (9): StoreBannerRequest, StoreCategoryRequest, StoreProductRequest, UpdateBannerRequest, UpdateProductRequest, PasswordUpdateRequest, ProfileDeleteRequest, ProfileUpdateRequest (+1 more)
 
-### Community 2 - "Button"
+### Community 1 - "ProductResource"
 Cohesion: 0.12
-Nodes (19): InputError(), PasskeyRegistration(), Props, PasswordInput(), Props, TextLink(), Checkbox(), Input() (+11 more)
+Nodes (5): {closure#1}(), CampaignResource, {closure#1}(), ProductResource, ResolvesMediaUrl
+
+### Community 2 - "lucide-react"
+Cohesion: 0.06
+Nodes (62): @laravel/passkeys, lucide-react, DeleteUser(), Heading(), InputError(), EmptyState(), ManagePasskeys(), Props (+54 more)
 
 ### Community 3 - "two-factor-recovery-codes.tsx"
 Cohesion: 0.25
 Nodes (14): AlertError(), Props, TwoFactorRecoveryCodes(), Alert(), AlertDescription(), AlertTitle(), alertVariants, Card() (+6 more)
 
-### Community 4 - "app-header.tsx"
-Cohesion: 0.18
-Nodes (19): AppHeader(), mainNavItems, Props, rightNavItems, Avatar(), AvatarFallback(), AvatarImage(), NavigationMenuItem() (+11 more)
+### Community 4 - "Category"
+Cohesion: 0.12
+Nodes (5): CategoryController, UpdateCategoryRequest, Campaign, Category, DatabaseSeeder
 
 ### Community 5 - "devDependencies"
 Cohesion: 0.07
@@ -378,7 +385,7 @@ Nodes (31): controlStatements, paddingAroundControl, globals@^15.14.0, devDepend
 
 ### Community 6 - "dependencies"
 Cohesion: 0.06
-Nodes (47): dependencies, clsx@^2.1.1, concurrently@^9.0.1, @inertiajs/react@^3.0.0, input-otp@^1.4.2, @laravel/passkeys@^0.2.0, lucide-react@^0.475.0, @radix-ui/react-avatar@^1.1.3 (+39 more)
+Nodes (34): dependencies, class-variance-authority@^0.7.1, clsx@^2.1.1, @inertiajs/react@^3.0.0, input-otp@^1.4.2, @laravel/passkeys@^0.2.0, lucide-react@^0.475.0, @radix-ui/react-avatar@^1.1.3 (+26 more)
 
 ### Community 7 - "Race Conditions"
 Cohesion: 0.05
@@ -389,64 +396,64 @@ Cohesion: 0.10
 Nodes (24): Edit(), EditProps, Order, OrderStatus, statuses, countries, formatCurrency(), formatDate() (+16 more)
 
 ### Community 9 - "verify_php_project.py"
-Cohesion: 0.16
-Nodes (23): composer_dep_mentions(), text_contains(), Check, check_pm01(), check_pm02(), check_pm03(), check_pm04(), check_pm05() (+15 more)
+Cohesion: 0.13
+Nodes (29): composer_dep_mentions(), text_contains(), AgentAction, build_actions(), check_pm01(), check_pm02(), check_pm03(), check_pm04() (+21 more)
 
 ### Community 10 - "introspect.py"
-Cohesion: 0.13
-Nodes (9): detect_archetype(), php_version_constraint(), read_composer_json(), _autoload_psr4(), build_profile(), _detect_php_runtime(), _has_baseline(), main() (+1 more)
+Cohesion: 0.12
+Nodes (10): detect_archetype(), php_version_constraint(), read_composer_json(), _autoload_psr4(), build_profile(), _detect_php_runtime(), _has_baseline(), main() (+2 more)
 
 ### Community 11 - "sidebar.tsx"
+Cohesion: 0.08
+Nodes (28): @inertiajs/react, AppSidebar(), baseMainNavItems, footerNavItems, AppearanceToggleTab(), NavFooter(), NavMain(), SidebarContent() (+20 more)
+
+### Community 12 - "bootstrap/app.php"
 Cohesion: 0.16
-Nodes (22): AppLogo(), AppSidebar(), baseMainNavItems, footerNavItems, NavFooter(), NavMain(), Sidebar(), SidebarContent() (+14 more)
+Nodes (5): EnsureUserIsAdmin, HandleAppearance, {closure#1}(), {closure#2}(), {closure#3}()
 
-### Community 12 - "CartContext.tsx"
-Cohesion: 0.21
-Nodes (22): DeleteUser(), PasskeyItem(), Props, Dialog(), DialogClose(), DialogContent(), DialogDescription(), DialogFooter() (+14 more)
-
-### Community 13 - "dropdown-menu.tsx"
-Cohesion: 0.12
-Nodes (20): NavUser(), DropdownMenu(), DropdownMenuCheckboxItem(), DropdownMenuContent(), DropdownMenuGroup(), DropdownMenuItem(), DropdownMenuLabel(), DropdownMenuRadioItem() (+12 more)
+### Community 13 - "app-header.tsx"
+Cohesion: 0.07
+Nodes (36): AppHeader(), mainNavItems, Props, rightNavItems, AppLogo(), AppLogoIcon(), NavUser(), Avatar() (+28 more)
 
 ### Community 14 - "AWS Security Patterns"
 Cohesion: 0.05
 Nodes (36): AWS Security Patterns, Changelog, CloudFormation: Open Security Group Ingress, CloudTrail Disabled or Not Multi-Region, CloudTrail: Logging and Monitoring, CloudTrail Missing Log Validation, Hardcoded Secrets in CloudFormation, Hardcoded Secrets Instead of Secrets Manager References (+28 more)
 
 ### Community 15 - "two-factor-setup-modal.tsx"
-Cohesion: 0.11
-Nodes (20): input-otp, react, GridScanIcon(), Props, TwoFactorSetupModal(), TwoFactorSetupStep(), TwoFactorVerificationStep(), DialogHeader() (+12 more)
+Cohesion: 0.12
+Nodes (16): input-otp, GridScanIcon(), Props, TwoFactorSetupStep(), TwoFactorVerificationStep(), InputOTP, InputOTPGroup, InputOTPSeparator (+8 more)
 
-### Community 16 - "security.tsx"
-Cohesion: 0.10
-Nodes (20): @laravel/passkeys, Heading(), EmptyState(), ManagePasskeys(), Props, ManageTwoFactor(), Props, PasskeyVerify() (+12 more)
+### Community 16 - "PasswordValidationRules"
+Cohesion: 0.18
+Nodes (4): CreateNewUser, ResetUserPassword, PasswordValidationRules, ProfileValidationRules
 
 ### Community 17 - "Core Python Security Patterns"
 Cohesion: 0.05
 Nodes (35): 10. Weak Hashing Algorithms, 11. Dynamic Import Abuse via `__import__` / importlib, 12. tempfile Race Conditions, 13. Regular Expression Denial of Service (ReDoS), 1. Insecure Deserialization via pickle / shelve / marshal, 3. Server-Side Template Injection (SSTI) in Jinja2 and Mako, 4. Command Injection via subprocess / os.system / os.popen, 5. Unsafe YAML Loading (+27 more)
 
 ### Community 19 - "index.ts"
-Cohesion: 0.19
-Nodes (14): AppContent(), Props, AppShell(), Props, AppSidebarHeader(), SidebarInset(), SidebarProvider(), SidebarTrigger() (+6 more)
+Cohesion: 0.13
+Nodes (22): AppContent(), Props, AppShell(), Props, AppSidebarHeader(), Breadcrumbs(), Breadcrumb(), BreadcrumbEllipsis() (+14 more)
 
 ### Community 20 - "Controller"
-Cohesion: 0.08
-Nodes (7): CampaignController, CampaignController, StoreCampaignRequest, UpdateCampaignRequest, CampaignResource, Campaign, DatabaseSeeder
+Cohesion: 0.13
+Nodes (3): CampaignController, StoreCampaignRequest, UpdateCampaignRequest
 
 ### Community 21 - "with"
 Cohesion: 0.08
 Nodes (24): runs-on, steps, strategy, jobs, ci, php-version, name, on (+16 more)
 
 ### Community 22 - "Inertia\Testing\AssertableInertia"
-Cohesion: 0.12
-Nodes (7): {closure#1}(), {closure#2}(), {closure#3}(), createUnseenAdminOrder(), {closure#2}(), {closure#4}(), {closure#2}()
+Cohesion: 0.09
+Nodes (9): {closure#1}(), {closure#2}(), {closure#3}(), createUnseenAdminOrder(), {closure#2}(), {closure#4}(), {closure#2}(), {closure#5}() (+1 more)
 
 ### Community 23 - "welcome.tsx"
 Cohesion: 0.05
-Nodes (64): normalizeImageUrl(), precacheImages(), BannerFields(), BannerFieldsProps, BannerFormData, BannerProductOption, Create(), CreateProps (+56 more)
+Nodes (63): normalizeImageUrl(), precacheImages(), BannerFields(), BannerFieldsProps, BannerFormData, BannerProductOption, Create(), CreateProps (+55 more)
 
 ### Community 24 - "cn"
-Cohesion: 0.12
-Nodes (25): class-variance-authority@^0.7.1, class-variance-authority, Badge(), badgeVariants, NavigationMenu(), NavigationMenuContent(), NavigationMenuIndicator(), NavigationMenuLink() (+17 more)
+Cohesion: 0.08
+Nodes (47): NavigationMenu(), NavigationMenuContent(), NavigationMenuIndicator(), NavigationMenuItem(), NavigationMenuLink(), NavigationMenuList(), NavigationMenuTrigger(), navigationMenuTriggerStyle (+39 more)
 
 ### Community 25 - "Supply Chain Security"
 Cohesion: 0.05
@@ -456,37 +463,33 @@ Nodes (36): Confirm real exposure in the deployed artifact, Dependabot / Renovat
 Cohesion: 0.04
 Nodes (46): default, description, required, type, default, description, required, type (+38 more)
 
-### Community 27 - "Product"
-Cohesion: 0.07
-Nodes (6): ProductController, ProductController, ProductController, {closure#1}(), ProductResource, Product
-
-### Community 28 - "API/CategoryController.php"
-Cohesion: 0.14
-Nodes (3): CategoryController, {closure#1}(), CategoryResource
+### Community 27 - "App\Models\Product"
+Cohesion: 0.08
+Nodes (4): ProductController, Product, ProductImage, CanProcessImages
 
 ### Community 29 - "steps"
 Cohesion: 0.11
 Nodes (18): jobs, quality, name, on, pull_request, push, permissions, contents (+10 more)
 
 ### Community 30 - "Order"
-Cohesion: 0.13
-Nodes (3): OrderController, Order, ProductImage
+Cohesion: 0.11
+Nodes (3): OrderController, HandleInertiaRequests, Order
 
 ### Community 31 - "Banner"
-Cohesion: 0.09
-Nodes (7): BannerController, {closure#1}(), {closure#2}(), {closure#3}(), Banner, CanProcessImages, ResolvesMediaUrl
+Cohesion: 0.14
+Nodes (5): BannerController, {closure#1}(), {closure#2}(), {closure#3}(), Banner
 
 ### Community 33 - "components.json"
 Cohesion: 0.11
 Nodes (17): aliases, components, hooks, lib, ui, utils, iconLibrary, rsc (+9 more)
 
-### Community 34 - "@inertiajs/react"
-Cohesion: 0.04
-Nodes (33): @inertiajs/react, lucide-react, IconProps, Banner, normalizeImageUrl(), Show(), ShowProps, Campaign (+25 more)
+### Community 34 - "campaigns/index.tsx"
+Cohesion: 0.25
+Nodes (5): Campaign, Index(), IndexProps, PaginatedCampaigns, Product
 
 ### Community 35 - "Any"
-Cohesion: 0.11
-Nodes (28): AgentAction, build_actions(), build_summary(), cache_load(), cache_signature(), cache_store(), check_pm13(), check_pm14() (+20 more)
+Cohesion: 0.12
+Nodes (21): build_summary(), cache_load(), cache_signature(), cache_store(), Check, check_pm13(), check_pm14(), check_pm15() (+13 more)
 
 ### Community 36 - "PHPStan Compliance Guide"
 Cohesion: 0.05
@@ -508,10 +511,6 @@ Nodes (16): compilerOptions, allowJs, baseUrl, esModuleInterop, forceConsistentC
 Cohesion: 0.06
 Nodes (32): Adding a cache to an existing environment, Adding a database to an existing environment, Checklists for Multi-Step Operations, Custom domain setup, Full environment setup (app + database + cache + domain), New app from scratch, Sending email with Resend, Application Setup (+24 more)
 
-### Community 42 - "sidebar.tsx"
-Cohesion: 0.15
-Nodes (17): SheetDescription(), SidebarContext, SidebarGroupAction(), SidebarInput(), SidebarMenuAction(), SidebarMenuBadge(), SidebarMenuButton(), sidebarMenuButtonVariants (+9 more)
-
 ### Community 43 - "Illuminate\Database\Schema\Blueprint"
 Cohesion: 0.23
 Nodes (6): {closure#1}(), {closure#2}(), {closure#3}(), {closure#1}(), {closure#2}(), {closure#3}()
@@ -521,8 +520,8 @@ Cohesion: 0.15
 Nodes (12): @inertiajs/vite@^3.0.0, laravel-vite-plugin@^3.0.0, @tailwindcss/vite@^4.1.11, vite@^8.0.0, @vitejs/plugin-react@^5.2.0, @laravel/vite-plugin-wayfinder@^0.1.3, @inertiajs/vite, laravel-vite-plugin (+4 more)
 
 ### Community 45 - "package.json"
-Cohesion: 0.15
-Nodes (13): optionalDependencies, lightningcss-linux-x64-gnu@^1.29.1, lightningcss-win32-x64-msvc@^1.29.1, @rollup/rollup-linux-x64-gnu@4.9.5, @rollup/rollup-win32-x64-msvc@4.9.5, @tailwindcss/oxide-linux-x64-gnu@^4.0.1, @tailwindcss/oxide-win32-x64-msvc@^4.0.1, lightningcss-linux-x64-gnu (+5 more)
+Cohesion: 0.14
+Nodes (18): @radix-ui/react-tooltip@^1.1.8, optionalDependencies, lightningcss-linux-x64-gnu@^1.29.1, lightningcss-win32-x64-msvc@^1.29.1, @rollup/rollup-linux-x64-gnu@4.9.5, @rollup/rollup-win32-x64-msvc@4.9.5, @tailwindcss/oxide-linux-x64-gnu@^4.0.1, @tailwindcss/oxide-win32-x64-msvc@^4.0.1 (+10 more)
 
 ### Community 46 - "Cloud CLI"
 Cohesion: 0.06
@@ -549,16 +548,16 @@ Cohesion: 0.26
 Nodes (5): {closure#2}(), {closure#3}(), {closure#4}(), StorefrontCartController, CartItems
 
 ### Community 54 - "auth.ts"
-Cohesion: 0.22
-Nodes (9): Auth, Passkey, TwoFactorSecretKey, TwoFactorSetupData, User, InertiaConfig, @inertiajs/core, InputHTMLAttributes (+1 more)
+Cohesion: 0.40
+Nodes (5): Auth, InertiaConfig, @inertiajs/core, InputHTMLAttributes, react
 
 ### Community 55 - "require-dev"
 Cohesion: 0.18
 Nodes (11): require-dev, fakerphp/faker, laravel/boost, laravel/pail, laravel/pao, laravel/pint, laravel/sail, mockery/mockery (+3 more)
 
-### Community 57 - "breadcrumbs.tsx"
-Cohesion: 0.33
-Nodes (10): @radix-ui/react-slot@^1.2.3, @radix-ui/react-slot, Breadcrumbs(), Breadcrumb(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList() (+2 more)
+### Community 57 - "react"
+Cohesion: 0.11
+Nodes (15): class-variance-authority, @radix-ui/react-slot, react, Badge(), badgeVariants, PlaceholderPatternProps, ToggleGroup(), ToggleGroupContext (+7 more)
 
 ### Community 58 - "require"
 Cohesion: 0.20
@@ -573,8 +572,8 @@ Cohesion: 0.07
 Nodes (28): Agent Configuration, Agents, Audio, Basic Usage Examples, Common Pitfalls, Conversation Context, Conversation Memory, Decision Workflow (+20 more)
 
 ### Community 62 - "Controller"
-Cohesion: 0.07
-Nodes (6): CategoryController, Controller, DashboardController, ProfileController, SecurityController, Category
+Cohesion: 0.10
+Nodes (5): Controller, DashboardController, ProfileController, SecurityController, WelcomeController
 
 ### Community 63 - "PHP Migration Strategies"
 Cohesion: 0.07
@@ -584,9 +583,9 @@ Nodes (28): Annotation to Attribute, Anti-Patterns to Avoid, Array to Named Argu
 Cohesion: 0.09
 Nodes (15): Code coverage: driver choice + branch coverage, Common antipatterns, Decision tree for migration, ❌ `expectNotToPerformAssertions()` with mock expectations, ❌ Leaving `->with(...)` on stub-style chains, Mass-conversion playbook, ❌ Mechanical `createMock` → `createStub`, Mock vs Stub: the decision that matters (+7 more)
 
-### Community 67 - "AppLogoIcon"
-Cohesion: 0.33
-Nodes (4): AppLogoIcon(), AuthSimpleLayout(), AuthSplitLayout(), AuthLayoutProps
+### Community 67 - "categories/index.tsx"
+Cohesion: 0.29
+Nodes (4): Category, Index(), IndexProps, PaginatedCategories
 
 ### Community 68 - "campaigns/edit.tsx"
 Cohesion: 0.32
@@ -602,7 +601,7 @@ Nodes (7): pestphp/pest-plugin, php-http/discovery, config, allow-plugins, optim
 
 ### Community 72 - "Illuminate\Http\Request"
 Cohesion: 0.04
-Nodes (16): BannerController, CategoryController, OrderController, EnsureUserIsAdmin, HandleAppearance, HandleInertiaRequests, {closure#1}(), {closure#10}() (+8 more)
+Nodes (12): BannerController, CampaignController, CategoryController, OrderController, ProductController, {closure#1}(), {closure#10}(), {closure#2}() (+4 more)
 
 ### Community 73 - "Basic Usage Examples"
 Cohesion: 0.07
@@ -644,9 +643,9 @@ Nodes (13): CodeGraph Rules, Copilot CLI Project Behavior Instructions, Final Ru
 Cohesion: 0.09
 Nodes (21): Anti-Patterns to Avoid, API Development, Architecture, Authentication, Behavioral Constraints, Blade & Views, Caching, Do NOT Use When (+13 more)
 
-### Community 93 - "use-appearance.tsx"
-Cohesion: 0.22
-Nodes (16): AppearanceToggleTab(), Appearance, applyTheme(), getStoredAppearance(), handleSystemThemeChange(), initializeTheme(), isDarkMode(), listeners (+8 more)
+### Community 93 - "app.tsx"
+Cohesion: 0.11
+Nodes (27): sonner@^2.0.0, sonner, isLayoutProps(), LayoutProps, PageLayoutComponent, pages, PageWithLayout(), setup() (+19 more)
 
 ### Community 113 - "llm_reviews"
 Cohesion: 0.10
@@ -698,7 +697,7 @@ Nodes (13): CI Integration, Common False-Positive Sources, Configuration, Diff M
 
 ### Community 125 - "modernize_loop.py"
 Cohesion: 0.21
-Nodes (17): build_next_actions(), _ensure_artifact_dir(), execute(), _find_binary(), main(), NextAction, parse_args(), parse_tools() (+9 more)
+Nodes (18): build_next_actions(), _ensure_artifact_dir(), execute(), _find_binary(), main(), NextAction, parse_args(), parse_tools() (+10 more)
 
 ### Community 126 - "Process"
 Cohesion: 0.17
@@ -756,9 +755,9 @@ Nodes (11): A. Validation & HTTP input, B. Controllers & routing, C. Authorizati
 Cohesion: 0.18
 Nodes (10): Basic usage, Common pitfalls, CSS-first configuration, Dark mode, Documentation, Import syntax, Replaced utilities, Spacing (+2 more)
 
-### Community 140 - "Laravel Fortify Development"
-Cohesion: 0.20
-Nodes (9): Available Features, Best Practices, Custom Authentication Logic, Documentation, Key Endpoints, Laravel Fortify Development, Rate Limiting, Registration Customization (+1 more)
+### Community 140 - "AppServiceProvider"
+Cohesion: 0.05
+Nodes (34): Available Features, Best Practices, Custom Authentication Logic, Documentation, Email Verification Setup, Key Endpoints, Laravel Fortify Development, Passkeys Setup (+26 more)
 
 ### Community 141 - "Advanced query best practices"
 Cohesion: 0.20
@@ -792,9 +791,9 @@ Nodes (9): Anti-patterns, Architectural rules, Integration with frameworks, Migr
 Cohesion: 0.07
 Nodes (28): Asymmetric Visibility (Public Read, Private Write), Deprecated Dynamic Properties (Prevents Mass Assignment), Detection Patterns, Detection Patterns for Auditing PHP Version Features, Disjunctive Normal Form (DNF) Types, Enums (Type-Safe Permissions, Roles, States), Fibers (Secret Leakage via Shared State), Intersection Types (Strict Contracts) (+20 more)
 
-### Community 149 - "Laravel Fortify Development"
-Cohesion: 0.20
-Nodes (9): Available Features, Best Practices, Custom Authentication Logic, Documentation, Key Endpoints, Laravel Fortify Development, Rate Limiting, Registration Customization (+1 more)
+### Community 149 - "products/edit.tsx"
+Cohesion: 0.33
+Nodes (5): Category, Edit(), EditProps, normalizeImageUrl(), Product
 
 ### Community 150 - "Advanced query best practices"
 Cohesion: 0.20
@@ -1021,8 +1020,8 @@ Cohesion: 0.07
 Nodes (26): Attack Complexity (AC), Attack Vector (AV), Base Metrics, CSRF, CVSS Scoring Guide (v3.1 & v4.0), CVSS v4.0 (Current Standard), Example: SQLi (v3.1 vs v4.0), Example: Stored XSS (v3.1 vs v4.0) (+18 more)
 
 ### Community 207 - "_resolve_phpstan_level_inner"
-Cohesion: 0.25
-Nodes (4): parse_phpstan_includes(), parse_phpstan_level(), resolve_phpstan_level(), _resolve_phpstan_level_inner()
+Cohesion: 0.33
+Nodes (3): parse_phpstan_includes(), parse_phpstan_level(), _resolve_phpstan_level_inner()
 
 ### Community 208 - "CWE Top 25 Most Dangerous Software Weaknesses (2025)"
 Cohesion: 0.07
@@ -1063,10 +1062,6 @@ Nodes (18): Changelog, Cross-Site Scripting (XSS), Data Exposure, Injection, Rel
 ### Community 217 - "XXE (XML External Entity) Prevention"
 Cohesion: 0.11
 Nodes (18): Attack Vectors, Detection Patterns, Doctrine XML Metadata, DOMDocument, Framework-Specific Solutions, Integration Tests, PHP XML Library Security, Remediation Priority (+10 more)
-
-### Community 218 - "app.tsx"
-Cohesion: 0.14
-Nodes (15): react-dom@^19.2.0, sonner@^2.0.0, react-dom, sonner, isLayoutProps(), LayoutProps, PageLayoutComponent, pages (+7 more)
 
 ### Community 219 - "React Security Patterns"
 Cohesion: 0.11
@@ -1188,9 +1183,13 @@ Nodes (8): Audit Trail Requirements, Log Injection Prevention, Overview, Related
 Cohesion: 0.25
 Nodes (7): CSRF Protection, Detection Patterns for Symfony, Firewall Configuration, Rate Limiter Component, Security Bundle Configuration, Security Voters for Authorization, Symfony Security Patterns
 
-### Community 250 - "Setup Workflows"
-Cohesion: 0.29
-Nodes (7): Email Verification Setup, Passkeys Setup, Password Reset Setup, Setup Workflows, SPA Authentication Setup, Two-Factor Authentication in SPA Mode, Two-Factor Authentication Setup
+### Community 249 - "App\Http\Controllers\Controller"
+Cohesion: 0.10
+Nodes (3): BannerController, CampaignController, BannerResource
+
+### Community 250 - "banners/show.tsx"
+Cohesion: 0.50
+Nodes (4): Banner, normalizeImageUrl(), Show(), ShowProps
 
 ### Community 251 - "Prevention Checklist"
 Cohesion: 0.29
@@ -1220,9 +1219,13 @@ Nodes (6): 1. Scan the full history for secrets, 2. Detect AI-context files in h
 Cohesion: 0.29
 Nodes (7): Administrative Actions, Application Errors and Exceptions, Authentication Events, Authorization Failures, Data Access to Sensitive Resources, Input Validation Failures, What to Log
 
-### Community 258 - "Setup Workflows"
-Cohesion: 0.29
-Nodes (7): Email Verification Setup, Passkeys Setup, Password Reset Setup, Setup Workflows, SPA Authentication Setup, Two-Factor Authentication in SPA Mode, Two-Factor Authentication Setup
+### Community 258 - "campaigns/show.tsx"
+Cohesion: 0.40
+Nodes (3): Campaign, Product, ShowProps
+
+### Community 259 - "categories/edit.tsx"
+Cohesion: 0.40
+Nodes (3): Category, Edit(), EditProps
 
 ### Community 260 - "semgrep - Static Analysis (SAST)"
 Cohesion: 0.33
@@ -1477,22 +1480,22 @@ Cohesion: 0.38
 Nodes (5): Create(), CreateProps, formatCurrency(), PricePreviewItem(), Product
 
 ## Knowledge Gaps
-- **50 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **53 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `two-factor-setup-modal.tsx` to `Button`, `two-factor-recovery-codes.tsx`, `app-header.tsx`, `dependencies`, `orders/index.tsx`, `sidebar.tsx`, `CartContext.tsx`, `dropdown-menu.tsx`, `security.tsx`, `index.ts`, `welcome.tsx`, `cn`, `@inertiajs/react`, `sidebar.tsx`, `breadcrumbs.tsx`, `AppLogoIcon`, `app.tsx`, `use-appearance.tsx`, `banners/index.tsx`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `@inertiajs/react` connect `sidebar.tsx` to `lucide-react`, `two-factor-recovery-codes.tsx`, `campaigns/show.tsx`, `categories/edit.tsx`, `dependencies`, `orders/index.tsx`, `app-header.tsx`, `two-factor-setup-modal.tsx`, `index.ts`, `products/edit.tsx`, `welcome.tsx`, `campaigns/index.tsx`, `dashboard.tsx`, `package.json`, `react`, `categories/index.tsx`, `campaigns/edit.tsx`, `products/show.tsx`, `campaigns/create.tsx`, `banners/index.tsx`, `app.tsx`, `banners/show.tsx`?**
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **Should `Illuminate\Foundation\Http\FormRequest` be split into smaller, more focused modules?**
-  _Cohesion score 0.05565638233514821 - nodes in this community are weakly interconnected._
-- **Why does `lucide-react` connect `@inertiajs/react` to `Button`, `two-factor-recovery-codes.tsx`, `app-header.tsx`, `dependencies`, `orders/index.tsx`, `sidebar.tsx`, `CartContext.tsx`, `dropdown-menu.tsx`, `two-factor-setup-modal.tsx`, `security.tsx`, `index.ts`, `welcome.tsx`, `cn`, `dashboard.tsx`, `sidebar.tsx`, `breadcrumbs.tsx`, `campaigns/edit.tsx`, `products/show.tsx`, `campaigns/create.tsx`, `use-appearance.tsx`, `banners/index.tsx`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Should `CampaignController` be split into smaller, more focused modules?**
-  _Cohesion score 0.08695652173913043 - nodes in this community are weakly interconnected._
-- **Why does `@inertiajs/react` connect `@inertiajs/react` to `Button`, `two-factor-recovery-codes.tsx`, `app-header.tsx`, `dependencies`, `orders/index.tsx`, `sidebar.tsx`, `CartContext.tsx`, `dropdown-menu.tsx`, `two-factor-setup-modal.tsx`, `security.tsx`, `index.ts`, `welcome.tsx`, `dashboard.tsx`, `breadcrumbs.tsx`, `AppLogoIcon`, `campaigns/edit.tsx`, `products/show.tsx`, `campaigns/create.tsx`, `app.tsx`, `banners/index.tsx`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
-- **Should `Button` be split into smaller, more focused modules?**
-  _Cohesion score 0.11755102040816326 - nodes in this community are weakly interconnected._
-- **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.07196969696969698 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08258258258258258 - nodes in this community are weakly interconnected._
+- **Why does `lucide-react` connect `lucide-react` to `campaigns/show.tsx`, `two-factor-recovery-codes.tsx`, `categories/edit.tsx`, `dependencies`, `orders/index.tsx`, `sidebar.tsx`, `app-header.tsx`, `two-factor-setup-modal.tsx`, `index.ts`, `products/edit.tsx`, `welcome.tsx`, `cn`, `campaigns/index.tsx`, `dashboard.tsx`, `package.json`, `react`, `categories/index.tsx`, `campaigns/edit.tsx`, `products/show.tsx`, `campaigns/create.tsx`, `banners/index.tsx`, `banners/show.tsx`?**
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Should `ProductResource` be split into smaller, more focused modules?**
+  _Cohesion score 0.11904761904761904 - nodes in this community are weakly interconnected._
+- **Why does `react` connect `react` to `lucide-react`, `two-factor-recovery-codes.tsx`, `campaigns/index.tsx`, `categories/index.tsx`, `dependencies`, `orders/index.tsx`, `sidebar.tsx`, `app-header.tsx`, `package.json`, `two-factor-setup-modal.tsx`, `index.ts`, `products/edit.tsx`, `welcome.tsx`, `cn`, `banners/index.tsx`, `app.tsx`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Should `lucide-react` be split into smaller, more focused modules?**
+  _Cohesion score 0.058376028566992706 - nodes in this community are weakly interconnected._
+- **Should `Category` be split into smaller, more focused modules?**
+  _Cohesion score 0.12121212121212122 - nodes in this community are weakly interconnected._
