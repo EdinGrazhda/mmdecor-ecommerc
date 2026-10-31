@@ -22,7 +22,7 @@ class WelcomeController extends Controller
     public function index(): Response
     {
         $products = Product::query()
-            ->with(['category', 'campaigns'])
+            ->with(['category', 'campaigns', 'media'])
             ->latest()
             ->get();
 
@@ -32,11 +32,12 @@ class WelcomeController extends Controller
             ->get();
 
         $banners = Banner::query()
+            ->with(['media', 'product.category', 'product.campaigns', 'product.media', 'selectedProducts.category', 'selectedProducts.campaigns', 'selectedProducts.media'])
             ->latest()
             ->get();
 
         $campaigns = Campaign::query()
-            ->with(['product.category', 'product.campaigns'])
+            ->with(['product.category', 'product.campaigns', 'product.media'])
             ->whereDate('start_date', '<=', now())
             ->whereDate('end_date', '>=', now())
             ->latest()

@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Search, Plus, Edit2, Trash2, ChevronLeft, ChevronRight, Eye, Package } from 'lucide-react';
+import { normalizeImageUrl } from '@/lib/media';
 
 interface Category {
     id: number;
@@ -11,7 +12,7 @@ interface Product {
     id: number;
     product_id: string; // SKU
     name: string;
-    image: string;
+    image: string | null;
     price: number;
     stock: number;
     category_id: number;
@@ -141,20 +142,21 @@ export default function Index({ products, categories, filters }: IndexProps) {
                                     products.data.map((product) => (
                                         <tr key={product.id} className="transition-colors hover:bg-[#F7FAFB]/50">
                                             <td className="px-6 py-3">
-                                                {product.image ? (
+                                                <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-[#D1E8F2] bg-[#F7FAFB] text-[#2E6F8F]/40">
+                                                    <Package size={16} aria-hidden="true" />
+                                                    {product.image && (
                                                     <img
-                                                        src={product.image}
+                                                        src={normalizeImageUrl(product.image) ?? undefined}
                                                         alt={product.name}
-                                                        className="h-10 w-10 rounded-lg object-cover border border-[#D1E8F2]"
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                        className="absolute inset-0 h-full w-full object-cover"
                                                         onError={(e) => {
-                                                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=80&q=80';
+                                                            e.currentTarget.style.display = 'none';
                                                         }}
                                                     />
-                                                ) : (
-                                                    <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#D1E8F2] bg-[#F7FAFB] text-[#2E6F8F]/40">
-                                                        <Package size={16} />
-                                                    </div>
-                                                )}
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 font-bold text-[#2E6F8F]">{product.product_id}</td>
                                             <td className="px-6 py-4 font-bold">{product.name}</td>

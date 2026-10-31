@@ -61,6 +61,7 @@ export interface Banner {
     image_thumb?: string | null;
     product_id?: number | null;
     product?: Product | null;
+    selected_products?: Product[];
 }
 
 export interface Campaign {
@@ -73,4 +74,3 @@ export interface Campaign {
     product_id: number;
     product?: Product;
 }
-

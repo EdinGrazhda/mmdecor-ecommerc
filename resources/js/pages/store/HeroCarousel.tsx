@@ -65,12 +65,19 @@ export const HeroCarousel = memo(function HeroCarousel({
                             <span className="text-base font-black text-white">
                                 ${current.featured.price.toFixed(2)}
                             </span>
-                            <span className="text-[12px] text-white/30 line-through">
-                                ${current.featured.originalPrice.toFixed(2)}
-                            </span>
-                            <span className="rounded bg-red-500 px-1.5 py-px text-[10px] font-black text-white">
-                                −{current.featured.discountPct}%
-                            </span>
+                            {current.featured.discountPct > 0 && (
+                                <>
+                                    <span className="text-[12px] text-white/30 line-through">
+                                        $
+                                        {current.featured.originalPrice.toFixed(
+                                            2,
+                                        )}
+                                    </span>
+                                    <span className="rounded bg-red-500 px-1.5 py-px text-[10px] font-black text-white">
+                                        −{current.featured.discountPct}%
+                                    </span>
+                                </>
+                            )}
                         </div>
                     )}
 
@@ -89,7 +96,8 @@ export const HeroCarousel = memo(function HeroCarousel({
                     {/* CTA buttons */}
                     <div className="flex flex-wrap items-center gap-3">
                         <button
-                            className="group/btn flex items-center gap-2 rounded-lg bg-[#2E6F8F] px-6 py-3 text-sm font-black tracking-wide text-white transition-all hover:bg-[#3A86AB] active:scale-95"
+                            disabled={!current.featured.inStock}
+                            className="group/btn flex items-center gap-2 rounded-lg bg-[#2E6F8F] px-6 py-3 text-sm font-black tracking-wide text-white transition-all hover:bg-[#3A86AB] focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D2535] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                             onClick={() =>
                                 current.featured.product &&
                                 onAddToCart(current.featured.product)
@@ -103,7 +111,7 @@ export const HeroCarousel = memo(function HeroCarousel({
                         </button>
                         {current.featured.product ? (
                             <Link
-                                href={`/products/${current.featured.product.id}`}
+                                href="/products"
                                 className="rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-white/65 transition-colors hover:border-white/45 hover:text-white"
                             >
                                 {current.ctaAlt}
@@ -123,20 +131,26 @@ export const HeroCarousel = memo(function HeroCarousel({
                 <div className="mx-auto mt-8 w-full max-w-xs md:mx-0 md:mt-0 md:w-[240px] md:shrink-0 lg:w-[280px] xl:w-[296px]">
                     <div className="group relative rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[0_24px_64px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.085]">
                         {/* Discount corner badge */}
-                        {!current.isBanner && (
-                            <div className="absolute -top-3 -right-3 flex h-12 w-12 flex-col items-center justify-center rounded-full bg-red-500 shadow-lg ring-2 ring-[#0D2535]">
-                                <span className="text-[11px] leading-none font-black text-white">
-                                    −{current.featured.discountPct}%
-                                </span>
-                                <span className="text-[8px] font-bold tracking-wide text-red-200 uppercase">
-                                    off
-                                </span>
-                            </div>
-                        )}
+                        {!current.isBanner &&
+                            current.featured.discountPct > 0 && (
+                                <div className="absolute -top-3 -right-3 flex h-12 w-12 flex-col items-center justify-center rounded-full bg-red-500 shadow-lg ring-2 ring-[#0D2535]">
+                                    <span className="text-[11px] leading-none font-black text-white">
+                                        −{current.featured.discountPct}%
+                                    </span>
+                                    <span className="text-[8px] font-bold tracking-wide text-red-200 uppercase">
+                                        off
+                                    </span>
+                                </div>
+                            )}
 
                         {/* Image area */}
                         <div className="relative mb-4 flex h-32 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#163345] to-[#1e5470]">
                             <div className="hero-product-pattern pointer-events-none absolute inset-0 opacity-[0.25]" />
+                            <Wrench
+                                size={30}
+                                className="absolute text-white/30"
+                                aria-hidden="true"
+                            />
                             {current.featured.image ? (
                                 <img
                                     src={
@@ -148,6 +162,10 @@ export const HeroCarousel = memo(function HeroCarousel({
                                     loading="eager"
                                     fetchPriority="high"
                                     decoding="async"
+                                    onError={(event) => {
+                                        event.currentTarget.style.display =
+                                            'none';
+                                    }}
                                     className="relative h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
                             ) : (
@@ -168,9 +186,15 @@ export const HeroCarousel = memo(function HeroCarousel({
                             <span className="rounded bg-[#2E6F8F]/50 px-2 py-px text-[10px] font-black tracking-wider text-[#7EC4DF] uppercase">
                                 {current.featured.brand}
                             </span>
-                            <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                                In Stock
+                            <span
+                                className={`flex items-center gap-1 text-[11px] font-semibold ${current.featured.inStock ? 'text-emerald-400' : 'text-white/45'}`}
+                            >
+                                <span
+                                    className={`h-1.5 w-1.5 rounded-full ${current.featured.inStock ? 'bg-emerald-400' : 'bg-white/35'}`}
+                                />
+                                {current.featured.inStock
+                                    ? 'In Stock'
+                                    : 'Out of Stock'}
                             </span>
                         </div>
 
@@ -198,7 +222,8 @@ export const HeroCarousel = memo(function HeroCarousel({
                                     {current.featured.rating}
                                 </span>
                                 <span className="text-[11px] text-white/30">
-                                    ({current.featured.reviews.toLocaleString()})
+                                    ({current.featured.reviews.toLocaleString()}
+                                    )
                                 </span>
                             </div>
                         )}
@@ -209,28 +234,38 @@ export const HeroCarousel = memo(function HeroCarousel({
                                 <span className="text-2xl font-black text-white">
                                     ${current.featured.price.toFixed(2)}
                                 </span>
-                                <span className="mb-0.5 text-sm text-white/30 line-through">
-                                    ${current.featured.originalPrice.toFixed(2)}
-                                </span>
-                                <span className="mb-0.5 ml-auto rounded bg-emerald-600/70 px-1.5 py-px text-[10px] font-black text-emerald-200">
-                                    SAVE $
-                                    {(
-                                        current.featured.originalPrice -
-                                        current.featured.price
-                                    ).toFixed(0)}
-                                </span>
+                                {current.featured.discountPct > 0 && (
+                                    <>
+                                        <span className="mb-0.5 text-sm text-white/30 line-through">
+                                            $
+                                            {current.featured.originalPrice.toFixed(
+                                                2,
+                                            )}
+                                        </span>
+                                        <span className="mb-0.5 ml-auto rounded bg-emerald-600/70 px-1.5 py-px text-[10px] font-black text-emerald-200">
+                                            SAVE $
+                                            {(
+                                                current.featured.originalPrice -
+                                                current.featured.price
+                                            ).toFixed(2)}
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         )}
 
                         {/* Add to Cart */}
                         <button
-                            className="mb-2 w-full rounded-lg bg-[#2E6F8F] py-2.5 text-sm font-black text-white transition-all hover:bg-[#3A86AB] active:scale-[0.98]"
+                            disabled={!current.featured.inStock}
+                            className="mb-2 w-full rounded-lg bg-[#2E6F8F] py-2.5 text-sm font-black text-white transition-all hover:bg-[#3A86AB] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/40 disabled:hover:bg-white/10"
                             onClick={() =>
                                 current.featured.product &&
                                 onAddToCart(current.featured.product)
                             }
                         >
-                            Add to Cart
+                            {current.featured.inStock
+                                ? 'Add to Cart'
+                                : 'Out of Stock'}
                         </button>
 
                         {/* View Details */}
@@ -259,6 +294,8 @@ export const HeroCarousel = memo(function HeroCarousel({
                     <button
                         key={i}
                         onClick={() => setSlide(i)}
+                        aria-label={`Show ${s.slideLabel}`}
+                        aria-current={i === slide ? 'true' : undefined}
                         className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold transition-all duration-300 ${
                             i === slide
                                 ? 'bg-[#2E6F8F] text-white shadow-md'
@@ -287,6 +324,7 @@ type HeroFeatured = {
     reviews: number;
     fitment: string;
     discountPct: number;
+    inStock: boolean;
 };
 
 type HeroDisplaySlide = {
@@ -307,7 +345,7 @@ function buildSlides(
     products: Product[],
 ): HeroDisplaySlide[] {
     const campaignSlides = campaigns
-        .filter((campaign) => campaign.product)
+        .filter((campaign) => campaign.product && Number(campaign.price) > 0)
         .slice(0, 3)
         .map((campaign) => {
             const product = campaign.product as Product;
@@ -328,13 +366,14 @@ function buildSlides(
         });
 
     if (banners.length > 0) {
-        return banners.slice(0, 3).map((banner, index) => {
-            const linkedProduct = banner.product ?? null;
+        return banners.slice(0, 3).flatMap((banner, index) => {
+            const selectedProducts = banner.selected_products ?? [];
+            const linkedProduct = banner.product ?? selectedProducts[0] ?? null;
             const fallbackProduct = products[index % Math.max(products.length, 1)];
-            const product = linkedProduct ?? fallbackProduct;
+            const bannerProducts = selectedProducts.length > 0 ? selectedProducts : [linkedProduct ?? fallbackProduct].filter(Boolean) as Product[];
             const fallback = HERO_SLIDES[index % HERO_SLIDES.length];
 
-            return {
+            return bannerProducts.map((product) => ({
                 eyebrow: 'Featured Store Banner',
                 title: banner.title,
                 sub: banner.subtitle,
@@ -342,7 +381,7 @@ function buildSlides(
                 ctaAlt: 'Browse All Parts',
                 chips: products.slice(0, 4).map((item) => item.category),
                 slideLabel: banner.title,
-                isBanner: !linkedProduct,
+                isBanner: !product,
                 featured: product
                     ? {
                           ...toFeaturedProduct(
@@ -355,7 +394,7 @@ function buildSlides(
                           ...fallback.featured,
                           image: banner.image,
                       },
-            };
+            }));
         });
     }
 
@@ -395,12 +434,13 @@ function toFeaturedProduct(
         image: product.image,
         price: product.price,
         originalPrice,
-        rating: product.rating,
+        rating: product.rating ?? 0,
         reviews: product.reviews,
         fitment: product.category,
         discountPct:
             originalPrice > product.price
                 ? Math.round((1 - product.price / originalPrice) * 100)
                 : 0,
+        inStock: (product.stock ?? 0) > 0,
     };
 }

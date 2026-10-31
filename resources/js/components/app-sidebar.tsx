@@ -86,8 +86,6 @@ export function AppSidebar() {
 
             router.reload({
                 only: ['admin'],
-                preserveScroll: true,
-                preserveState: true,
             });
         }, 10_000);
 

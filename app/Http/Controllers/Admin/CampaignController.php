@@ -17,10 +17,10 @@ class CampaignController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Campaign::query()->with('product');
+        $query = Campaign::query()->with('product:id,name');
 
         if ($request->filled('search')) {
-            $query->where('campaign_name', 'like', '%' . $request->search . '%');
+            $query->where('campaign_name', 'like', '%'.$request->search.'%');
         }
 
         $campaigns = $query->latest()->paginate(10)->withQueryString();
@@ -37,7 +37,7 @@ class CampaignController extends Controller
     public function create()
     {
         return Inertia::render('Admin/campaigns/create', [
-            'products' => Product::all(),
+            'products' => Product::query()->get(['id', 'name']),
         ]);
     }
 
@@ -57,7 +57,7 @@ class CampaignController extends Controller
     public function show(Campaign $campaign)
     {
         return Inertia::render('Admin/campaigns/show', [
-            'campaign' => $campaign->load('product'),
+            'campaign' => $campaign->load('product:id,name'),
         ]);
     }
 
@@ -67,8 +67,8 @@ class CampaignController extends Controller
     public function edit(Campaign $campaign)
     {
         return Inertia::render('Admin/campaigns/edit', [
-            'campaign' => $campaign,
-            'products' => Product::all(['id', 'name', 'price']),
+            'campaign' => $campaign->load('product:id,name'),
+            'products' => Product::query()->get(['id', 'name']),
         ]);
     }
 

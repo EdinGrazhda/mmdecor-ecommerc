@@ -23,8 +23,8 @@ class ProductController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('product_id', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('product_id', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -36,7 +36,7 @@ class ProductController extends Controller
 
         return Inertia::render('Admin/products/index', [
             'products' => $products,
-            'categories' => Category::all(),
+            'categories' => Category::query()->get(['id', 'name']),
             'filters' => $request->only(['search', 'category_id']),
         ]);
     }
@@ -47,7 +47,7 @@ class ProductController extends Controller
     public function create()
     {
         return Inertia::render('Admin/products/create', [
-            'categories' => Category::all(),
+            'categories' => Category::query()->get(['id', 'name']),
         ]);
     }
 
@@ -74,7 +74,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return Inertia::render('Admin/products/show', [
-            'product' => new ProductResource($product->load(['category', 'campaigns'])),
+            'product' => new ProductResource($product->load(['category', 'campaigns', 'media'])),
         ]);
     }
 
@@ -84,8 +84,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         return Inertia::render('Admin/products/edit', [
-            'product' => new ProductResource($product->load(['category', 'campaigns'])),
-            'categories' => Category::all(),
+            'product' => new ProductResource($product->load(['category', 'campaigns', 'media'])),
+            'categories' => Category::query()->get(['id', 'name']),
         ]);
     }
 
@@ -131,7 +131,7 @@ class ProductController extends Controller
     }
 
     /**
-     * @param array<int, UploadedFile> $images
+     * @param  array<int, UploadedFile>  $images
      */
     private function attachImages(Product $product, array $images): void
     {

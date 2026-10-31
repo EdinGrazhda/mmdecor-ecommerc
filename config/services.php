@@ -36,7 +36,7 @@ return [
     ],
 
     'whatsapp' => [
-        'phone' => env('WHATSAPP_PHONE', ''),
+        'phone' => env('WHATSAPP_PHONE') ?: '045446665',
     ],
 
 ];

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Support\CanProcessImages;
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -28,6 +28,13 @@ class Banner extends Model implements HasMedia
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function selectedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'banner_product')
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order');
     }
 
     public function registerMediaCollections(): void

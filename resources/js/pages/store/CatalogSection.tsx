@@ -1,5 +1,12 @@
 import { memo, useCallback, useMemo, useState } from 'react';
-import { ChevronRight, Heart, Search, ShoppingCart, X } from 'lucide-react';
+import {
+    ChevronRight,
+    Heart,
+    PackageOpen,
+    Search,
+    ShoppingCart,
+    X,
+} from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { normalizeImageUrl } from '@/lib/media';
 import { CATEGORIES, PRODUCTS } from './data';
@@ -45,7 +52,7 @@ export function CatalogSection({
         if (sortBy === 'price-desc')
             list = [...list].sort((a, b) => b.price - a.price);
         if (sortBy === 'rating')
-            list = [...list].sort((a, b) => b.rating - a.rating);
+            list = [...list].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         return list;
     }, [activeCategory?.label, activeCategoryId, productItems, sortBy]);
 
@@ -58,7 +65,39 @@ export function CatalogSection({
     }, []);
 
     return (
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="mb-7 flex flex-col justify-between gap-5 rounded-2xl border border-[#D1E8F2] bg-white p-5 shadow-[0_8px_30px_-20px_rgba(13,37,53,0.3)] sm:flex-row sm:items-center sm:p-6">
+                <div>
+                    <p className="mb-1 text-[10px] font-black tracking-[0.2em] text-[#2E6F8F] uppercase">
+                        MMDECOR parts catalog
+                    </p>
+                    <h2 className="text-xl font-black tracking-tight text-[#0D2535] sm:text-2xl">
+                        Find the right part for your ride
+                    </h2>
+                    <p className="mt-1 text-sm text-[#0D2535]/55">
+                        Browse the available inventory by category, price, or
+                        customer rating.
+                    </p>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-[#D1E8F2] rounded-xl bg-[#F4F9FB] px-2 py-3 sm:min-w-[360px]">
+                    <CatalogMetric
+                        label="Parts listed"
+                        value={productItems.length}
+                    />
+                    <CatalogMetric
+                        label="Categories"
+                        value={Math.max(categoryItems.length - 1, 0)}
+                    />
+                    <CatalogMetric
+                        label="On sale"
+                        value={
+                            productItems.filter(
+                                (product) => product.tag === 'SALE',
+                            ).length
+                        }
+                    />
+                </div>
+            </div>
             <div className="flex gap-6">
                 {/* Mobile overlay */}
                 {catSidebarOpen && (
@@ -168,11 +207,18 @@ export function CatalogSection({
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-3">
+                        <div
+                            className={`grid gap-5 ${visibleProducts.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}
+                        >
                             {visibleProducts.map((p) => (
                                 <ProductCard
                                     key={p.id}
                                     product={p}
+                                    className={
+                                        visibleProducts.length === 1
+                                            ? 'w-full max-w-sm'
+                                            : ''
+                                    }
                                     isWishlisted={wishlistSet.has(p.id)}
                                     onAddToCart={onAddToCart}
                                     onToggleWishlist={toggleWishlist}
@@ -201,6 +247,7 @@ export function CatalogSection({
 
 interface ProductCardProps {
     product: Product;
+    className?: string;
     isWishlisted: boolean;
     onAddToCart: (product: Product) => void;
     onToggleWishlist: (id: number) => void;
@@ -208,6 +255,7 @@ interface ProductCardProps {
 
 const ProductCard = memo(function ProductCard({
     product,
+    className = '',
     isWishlisted,
     onAddToCart,
     onToggleWishlist,
@@ -219,79 +267,105 @@ const ProductCard = memo(function ProductCard({
             : null);
     const originalPrice = product.originalPrice;
     const isOnSale =
-        product.tag === 'SALE' && originalPrice !== null && discountPct !== null;
+        product.tag === 'SALE' &&
+        originalPrice !== null &&
+        discountPct !== null &&
+        discountPct > 0;
+    const isInStock = (product.stock ?? 0) > 0;
 
     return (
-        <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)]">
+        <div
+            className={`group relative flex flex-col overflow-hidden rounded-2xl border border-[#2E6F8F]/20 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-[#2E6F8F]/55 hover:shadow-[0_12px_40px_-8px_rgba(46,111,143,0.18)] ${className}`}
+        >
             {/* Clickable area — image + info (not the action buttons) */}
             <Link
                 href={`/products/${product.id}`}
                 className="flex flex-col"
                 aria-label={`View ${product.name}`}
             >
-            <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] sm:h-48">
-                <div className="catalog-product-pattern pointer-events-none absolute inset-0 opacity-[0.35]" />
-                <span className="pointer-events-none absolute right-2 bottom-2 text-[9px] font-black tracking-widest text-[#2E6F8F]/20 uppercase select-none">
-                    #{String(product.id).padStart(4, '0')}
-                </span>
-                {product.image ? (
-                    <img
-                        src={normalizeImageUrl(product.image) ?? undefined}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="relative h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] sm:h-48">
+                    <div className="catalog-product-pattern pointer-events-none absolute inset-0 opacity-[0.35]" />
+                    <PackageOpen
+                        size={38}
+                        className="absolute text-[#2E6F8F]/25"
+                        aria-hidden="true"
                     />
-                ) : (
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#2E6F8F]/10 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-2xl">
-                        <ShoppingCart
-                            size={20}
-                            className="text-[#2E6F8F]/30 sm:hidden"
-                        />
-                        <ShoppingCart
-                            size={26}
-                            className="hidden text-[#2E6F8F]/30 sm:block"
-                        />
-                    </div>
-                )}
-                {product.tag && (
-                    <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
-                        <TagBadge tag={product.tag} />
-                    </div>
-                )}
-                {isOnSale && (
-                    <div className="absolute right-2 bottom-2 rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-black text-white shadow-md sm:right-3 sm:bottom-3">
-                        -{discountPct}%
-                    </div>
-                )}
-            </div>
-
-            <div className="flex flex-1 flex-col p-3 sm:p-4">
-                <div className="mb-1 flex items-center justify-between gap-1">
-                    <p className="text-[9px] font-black tracking-widest text-[#2E6F8F] uppercase sm:text-[10px]">
-                        {product.brand}
-                    </p>
-                    <p className="truncate text-[9px] text-[#0D2535]/30 sm:text-[10px]">
-                        {product.category}
-                    </p>
-                </div>
-
-                <p className="mb-1.5 line-clamp-2 text-[12px] leading-snug font-bold text-[#0D2535] sm:mb-2 sm:text-[13px]">
-                    {product.name}
-                </p>
-
-                <div className="mb-2 flex items-center gap-1 sm:mb-3 sm:gap-1.5">
-                    <StarRating rating={product.rating} />
-                    <span className="text-[10px] text-[#0D2535]/35 sm:text-[11px]">
-                        ({product.reviews})
+                    <span className="pointer-events-none absolute right-2 bottom-2 text-[9px] font-black tracking-widest text-[#2E6F8F]/20 uppercase select-none">
+                        #{String(product.id).padStart(4, '0')}
                     </span>
+                    {product.image ? (
+                        <img
+                            src={normalizeImageUrl(product.image) ?? undefined}
+                            alt={product.name}
+                            loading="lazy"
+                            decoding="async"
+                            onError={(event) => {
+                                event.currentTarget.style.display = 'none';
+                            }}
+                            className="relative h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                    ) : (
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#2E6F8F]/10 bg-white shadow-sm transition-transform duration-300 group-hover:scale-105 sm:h-20 sm:w-20 sm:rounded-2xl">
+                            <ShoppingCart
+                                size={20}
+                                className="text-[#2E6F8F]/30 sm:hidden"
+                            />
+                            <ShoppingCart
+                                size={26}
+                                className="hidden text-[#2E6F8F]/30 sm:block"
+                            />
+                        </div>
+                    )}
+                    {product.tag && (
+                        <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                            <TagBadge tag={product.tag} />
+                        </div>
+                    )}
+                    {isOnSale && (
+                        <div className="absolute right-2 bottom-2 rounded-full bg-red-500 px-2.5 py-1 text-[10px] font-black text-white shadow-md sm:right-3 sm:bottom-3">
+                            -{discountPct}%
+                        </div>
+                    )}
                 </div>
 
-                <p className="mb-3 hidden text-[11px] leading-relaxed text-[#0D2535]/40 sm:block">
-                    Compatible with most {product.category.toLowerCase()}{' '}
-                    applications.
-                </p>
-            </div>
+                <div className="flex flex-1 flex-col p-3 sm:p-4">
+                    <div className="mb-1 flex items-center justify-between gap-1">
+                        <p className="text-[9px] font-black tracking-widest text-[#2E6F8F] uppercase sm:text-[10px]">
+                            {product.brand}
+                        </p>
+                        <p className="truncate text-[9px] text-[#0D2535]/30 sm:text-[10px]">
+                            {product.category}
+                        </p>
+                    </div>
+
+                    <p className="mb-1.5 line-clamp-2 text-[12px] leading-snug font-bold text-[#0D2535] sm:mb-2 sm:text-[13px]">
+                        {product.name}
+                    </p>
+
+                    <div className="mb-2 flex items-center gap-1 sm:mb-3 sm:gap-1.5">
+                        <StarRating rating={product.rating ?? 0} />
+                        <span className="text-[10px] text-[#0D2535]/35 sm:text-[11px]">
+                            ({product.reviews})
+                        </span>
+                    </div>
+
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-[11px]">
+                        <span className="text-[#0D2535]/40">
+                            Part no. {product.product_id || `#${product.id}`}
+                        </span>
+                        <span
+                            className={
+                                isInStock
+                                    ? 'font-semibold text-emerald-700'
+                                    : 'font-semibold text-red-600'
+                            }
+                        >
+                            {isInStock
+                                ? `${product.stock} in stock`
+                                : 'Out of stock'}
+                        </span>
+                    </div>
+                </div>
             </Link>
 
             {/* Action row — outside the Link so buttons don't trigger navigation */}
@@ -312,8 +386,14 @@ const ProductCard = memo(function ProductCard({
                 </div>
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={(e) => { e.stopPropagation(); onToggleWishlist(product.id); }}
-                        className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EBF3F7] shadow-sm transition-all hover:scale-110 active:scale-90"
+                        type="button"
+                        aria-label={`${isWishlisted ? 'Remove' : 'Add'} ${product.name} ${isWishlisted ? 'from' : 'to'} wishlist`}
+                        aria-pressed={isWishlisted}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleWishlist(product.id);
+                        }}
+                        className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EBF3F7] shadow-sm transition-all hover:scale-110 focus-visible:ring-2 focus-visible:ring-[#2E6F8F] focus-visible:ring-offset-2 active:scale-90"
                     >
                         <Heart
                             size={11}
@@ -325,14 +405,37 @@ const ProductCard = memo(function ProductCard({
                         />
                     </button>
                     <button
-                        onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
-                        className="flex shrink-0 items-center gap-1 rounded-full bg-[#2E6F8F] px-2.5 py-1.5 text-[10px] font-black text-white transition-all hover:bg-[#1E5A7A] active:scale-90 sm:gap-1.5 sm:px-3 sm:text-[11px]"
+                        disabled={!isInStock}
+                        aria-label={
+                            isInStock
+                                ? `Add ${product.name} to cart`
+                                : `${product.name} is out of stock`
+                        }
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAddToCart(product);
+                        }}
+                        className="flex min-h-9 shrink-0 items-center gap-1 rounded-full bg-[#2E6F8F] px-3 py-1.5 text-[10px] font-black text-white transition-all hover:bg-[#1E5A7A] focus-visible:ring-2 focus-visible:ring-[#2E6F8F] focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600 disabled:hover:bg-slate-300 sm:gap-1.5 sm:px-3 sm:text-[11px]"
                     >
                         <ShoppingCart size={10} />
-                        Add
+                        {isInStock ? 'Add' : 'Unavailable'}
                     </button>
                 </div>
             </div>
         </div>
     );
 });
+
+function CatalogMetric({ label, value }: { label: string; value: number }) {
+    return (
+        <div className="px-2 text-center">
+            <p className="text-lg leading-none font-black text-[#0D2535]">
+                {value.toLocaleString()}
+            </p>
+            <p className="mt-1.5 text-[10px] font-semibold text-[#0D2535]/45 sm:text-[11px]">
+                {label}
+            </p>
+        </div>
+    );
+}

@@ -11,6 +11,7 @@ declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
             name: string;
+            whatsappPhone: string;
             auth: Auth;
             sidebarOpen: boolean;
             [key: string]: unknown;

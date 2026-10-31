@@ -1,7 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
-import { BannerFields, type DiscountedProduct } from './create';
+import { normalizeImageUrl } from '@/lib/media';
+import { BannerFields, type BannerProductOption } from './create';
 
 interface BannerProduct {
     id: number;
@@ -15,34 +16,35 @@ interface Banner {
     subtitle: string;
     image: string | null;
     product_id: number | null;
+    selected_products?: BannerProductOption[];
     product?: BannerProduct | null;
 }
 
 interface EditProps {
     banner: Banner;
-    discountedProducts: DiscountedProduct[];
+    products: BannerProductOption[];
 }
 
-export default function Edit({ banner, discountedProducts }: EditProps) {
+export default function Edit({ banner, products }: EditProps) {
     const { data, setData, post, processing, errors } = useForm({
         _method: 'put' as const,
         title: banner.title,
         subtitle: banner.subtitle,
-        product_id: (banner.product_id ?? '') as string | number,
+        selected_product_ids: banner.selected_products?.map((product) => product.id) ?? (banner.product_id ? [banner.product_id] : []),
         image: null as File | null,
     });
 
-    const selectedProduct = useMemo(
-        () => discountedProducts.find((p) => p.id === Number(data.product_id)) ?? null,
-        [data.product_id, discountedProducts],
+    const selectedProducts = useMemo(
+        () => products.filter((product) => data.selected_product_ids.includes(product.id)),
+        [data.selected_product_ids, products],
     );
 
     const previewUrl = useMemo(
         () =>
             data.image
                 ? URL.createObjectURL(data.image)
-                : selectedProduct?.image ?? banner.image,
-        [banner.image, data.image, selectedProduct],
+                : normalizeImageUrl(selectedProducts[0]?.image ?? banner.image),
+        [banner.image, data.image, selectedProducts],
     );
 
     useEffect(
@@ -89,8 +91,8 @@ export default function Edit({ banner, discountedProducts }: EditProps) {
                             errors={errors}
                             setData={setData}
                             previewUrl={previewUrl}
-                            discountedProducts={discountedProducts}
-                            selectedProduct={selectedProduct}
+                            products={products}
+                            selectedProducts={selectedProducts}
                         />
 
                         <div className="flex justify-end gap-3 border-t border-[#F0F7FB] pt-6">

@@ -26,7 +26,9 @@ class StoreBannerRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'subtitle' => ['required', 'string', 'max:255'],
             'product_id' => ['nullable', 'exists:product,id'],
-            'image' => [$this->filled('product_id') ? 'nullable' : 'required', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
+            'selected_product_ids' => ['nullable', 'array', 'max:12'],
+            'selected_product_ids.*' => ['integer', 'distinct', 'exists:product,id'],
+            'image' => ['required_without_all:product_id,selected_product_ids', 'nullable', 'image', 'mimes:webp,jpg,jpeg,png,avif', 'max:8192'],
         ];
     }
 }

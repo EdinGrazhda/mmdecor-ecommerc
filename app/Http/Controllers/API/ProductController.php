@@ -27,7 +27,7 @@ class ProductController extends Controller
             $cacheKey = 'products_all_cat_'.($categoryId ?? 'all').'_sort_'.$sortBy;
 
             $products = Cache::remember($cacheKey, 600, function () use ($categoryId, $sortBy) {
-                $query = Product::query()->with(['category', 'campaigns']);
+                $query = Product::query()->with(['category', 'campaigns', 'media']);
 
                 if ($categoryId) {
                     $query->where('category_id', $categoryId);
@@ -76,7 +76,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product created successfully',
-                'data' => new ProductResource($product->load(['category', 'campaigns'])),
+                'data' => new ProductResource($product->load(['category', 'campaigns', 'media'])),
             ], 201);
         } catch (\Exception $e) {
             Log::error('Error creating product: '.$e->getMessage());
@@ -95,7 +95,7 @@ class ProductController extends Controller
     public function show(string $id)
     {
         try {
-            $product = Product::with(['category', 'campaigns'])->findOrFail($id);
+            $product = Product::with(['category', 'campaigns', 'media'])->findOrFail($id);
 
             return new ProductResource($product);
         } catch (\Exception $e) {
@@ -130,7 +130,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Product updated successfully',
-                'data' => new ProductResource($product->load(['category', 'campaigns'])),
+                'data' => new ProductResource($product->load(['category', 'campaigns', 'media'])),
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error updating product: '.$e->getMessage());
@@ -192,7 +192,7 @@ class ProductController extends Controller
     }
 
     /**
-     * @param array<int, UploadedFile> $images
+     * @param  array<int, UploadedFile>  $images
      */
     private function attachImages(Product $product, array $images): void
     {

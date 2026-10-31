@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Menu, Phone, Search, ShoppingCart, Tag } from 'lucide-react';
 import { memo } from 'react';
 
@@ -13,6 +13,12 @@ export const StoreNavbar = memo(function StoreNavbar({
     onCartClick,
     onMenuClick,
 }: StoreNavbarProps) {
+    const { whatsappPhone } = usePage().props;
+    const phoneDigits = whatsappPhone.replace(/\D/g, '');
+    const internationalPhone = phoneDigits.startsWith('0')
+        ? `+383${phoneDigits.slice(1)}`
+        : `+${phoneDigits}`;
+
     return (
         <header className="sticky top-0 z-50 border-b border-[#E2EEF4] bg-white shadow-sm">
             <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
@@ -38,9 +44,20 @@ export const StoreNavbar = memo(function StoreNavbar({
                             />
                         </Link>
 
+                        <a
+                            href={`tel:${internationalPhone}`}
+                            aria-label="Call 045 446 665"
+                            className="ml-auto inline-flex items-center gap-1 rounded-md px-1 py-2 text-[11px] font-semibold whitespace-nowrap text-[#0D2535]/55 hover:bg-[#EBF3F7] hover:text-[#2E6F8F] sm:text-xs"
+                        >
+                            <Phone size={13} />
+                            <span className="hidden min-[360px]:inline">
+                                045 446 665
+                            </span>
+                        </a>
+
                         <button
                             type="button"
-                            className="relative ml-auto rounded-md p-2 text-[#0D2535]/65 hover:bg-[#EBF3F7] hover:text-[#2E6F8F]"
+                            className="relative rounded-md p-2 text-[#0D2535]/65 hover:bg-[#EBF3F7] hover:text-[#2E6F8F]"
                             onClick={onCartClick}
                             aria-label="Cart"
                         >
@@ -95,11 +112,11 @@ export const StoreNavbar = memo(function StoreNavbar({
                         <div className="mx-1.5 h-5 w-px bg-[#E2EEF4]" />
 
                         <a
-                            href="tel:+18005551234"
+                            href={`tel:${internationalPhone}`}
                             className="flex items-center gap-1.5 rounded-md px-3 py-2 text-[12px] font-semibold text-[#0D2535]/45 transition-colors hover:bg-[#EBF3F7] hover:text-[#2E6F8F]"
                         >
                             <Phone size={13} />
-                            1-800-555-1234
+                            045 446 665
                         </a>
 
                         <button

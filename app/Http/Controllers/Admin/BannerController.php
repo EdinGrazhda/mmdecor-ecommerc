@@ -7,8 +7,10 @@ use App\Http\Requests\API\StoreBannerRequest;
 use App\Http\Requests\API\UpdateBannerRequest;
 use App\Models\Banner;
 use App\Models\Product;
+use App\Support\ResolvesMediaUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 
 class BannerController extends Controller
@@ -18,13 +20,22 @@ class BannerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Banner::query()->with('product');
+        $query = Banner::query();
 
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $query->where('title', 'like', '%'.$request->search.'%');
         }
 
-        $banners = $query->latest()->paginate(10)->withQueryString();
+        $banners = $query
+            ->with(['media', 'product.media'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function (Banner $banner): Banner {
+                $banner->setAttribute('image', $this->resolveBannerImage($banner));
+
+                return $banner;
+            });
 
         return Inertia::render('Admin/banners/index', [
             'banners' => $banners,
@@ -38,7 +49,7 @@ class BannerController extends Controller
     public function create()
     {
         return Inertia::render('Admin/banners/create', [
-            'discountedProducts' => $this->getDiscountedProducts(),
+            'products' => $this->getProducts(),
         ]);
     }
 
@@ -48,16 +59,19 @@ class BannerController extends Controller
     public function store(StoreBannerRequest $request)
     {
         $validated = $request->validated();
+        $selectedProductIds = $this->selectedProductIds($validated);
 
         $banner = Banner::create([
-            ...collect($validated)->except('image')->all(),
+            ...collect($validated)->except(['image', 'selected_product_ids', 'product_id'])->all(),
+            'product_id' => $selectedProductIds[0] ?? ($validated['product_id'] ?? null),
             'image' => '',
         ]);
+        $banner->selectedProducts()->sync($this->orderedProductIds($selectedProductIds));
 
         if ($request->hasFile('image')) {
             $this->attachImage($banner, $request->file('image'));
         } elseif ($banner->product_id) {
-            $product = Product::find($banner->product_id);
+            $product = $banner->product;
             if ($product?->image) {
                 $banner->forceFill(['image' => $product->image])->saveQuietly();
             }
@@ -72,7 +86,7 @@ class BannerController extends Controller
     public function show(Banner $banner)
     {
         return Inertia::render('Admin/banners/show', [
-            'banner' => $banner->load('product'),
+            'banner' => $banner->load(['media', 'product.media']),
         ]);
     }
 
@@ -82,8 +96,10 @@ class BannerController extends Controller
     public function edit(Banner $banner)
     {
         return Inertia::render('Admin/banners/edit', [
-            'banner' => $banner->load('product'),
-            'discountedProducts' => $this->getDiscountedProducts(),
+            'banner' => tap($banner->load(['media', 'product.media', 'selectedProducts']), function (Banner $loadedBanner): void {
+                $loadedBanner->setAttribute('image', $this->resolveBannerImage($loadedBanner));
+            }),
+            'products' => $this->getProducts(),
         ]);
     }
 
@@ -93,21 +109,28 @@ class BannerController extends Controller
     public function update(UpdateBannerRequest $request, Banner $banner)
     {
         $validated = $request->validated();
+        $selectedProductIds = $this->selectedProductIds($validated, $banner);
 
-        $banner->update(collect($validated)->except('image')->all());
+        $banner->update([
+            ...collect($validated)->except(['image', 'selected_product_ids', 'product_id'])->all(),
+            'product_id' => $selectedProductIds[0] ?? ($validated['product_id'] ?? null),
+        ]);
+        if (array_key_exists('selected_product_ids', $validated) || array_key_exists('product_id', $validated)) {
+            $banner->selectedProducts()->sync($this->orderedProductIds($selectedProductIds));
+        }
 
         if ($request->hasFile('image')) {
             $this->attachImage($banner, $request->file('image'));
-        } elseif ($banner->product_id && !$banner->getFirstMedia('images')) {
-            $product = Product::find($banner->product_id);
+        } elseif ($banner->product_id && ! $banner->getFirstMedia('images')) {
+            $product = $banner->product;
             if ($product?->image) {
                 $banner->forceFill(['image' => $product->image])->saveQuietly();
             }
-        } elseif (array_key_exists('product_id', $validated) && !$validated['product_id']) {
+        } elseif (array_key_exists('product_id', $validated) && ! $validated['product_id']) {
             // product cleared — keep existing image as-is
-        } elseif ($banner->fresh()->product_id && !$request->hasFile('image')) {
-            $product = Product::find($banner->fresh()->product_id);
-            if ($product?->image && !$banner->getFirstMedia('images')) {
+        } elseif ($banner->fresh()->product_id && ! $request->hasFile('image')) {
+            $product = $banner->fresh()->product;
+            if ($product?->image && ! $banner->getFirstMedia('images')) {
                 $banner->forceFill(['image' => $product->image])->saveQuietly();
             }
         }
@@ -139,16 +162,55 @@ class BannerController extends Controller
         $banner->syncImageColumnFromMedia();
     }
 
-    private function getDiscountedProducts(): \Illuminate\Support\Collection
+    private function getProducts(): Collection
     {
-        return Product::whereHas('campaigns')
-            ->with(['campaigns' => fn ($q) => $q->latest()->limit(1)])
+        return Product::query()
+            ->select(['id', 'name', 'image', 'price', 'stock'])
+            ->with('media')
+            ->orderBy('name')
             ->get()
-            ->map(fn (Product $product) => [
+            ->map(fn (Product $product): array => [
                 'id' => $product->id,
                 'name' => $product->name,
-                'image' => $product->image,
-                'discount' => (int) optional($product->campaigns->first())->price,
+                'image' => ResolvesMediaUrl::primary($product, 'images', $product->image),
+                'price' => (float) $product->price,
+                'stock' => (int) $product->stock,
             ]);
+    }
+
+    private function resolveBannerImage(Banner $banner): ?string
+    {
+        if ($banner->getFirstMedia('images')) {
+            return ResolvesMediaUrl::primary($banner, 'images');
+        }
+
+        if ($banner->relationLoaded('product') && $banner->product) {
+            return ResolvesMediaUrl::primary($banner->product, 'images', $banner->product->image);
+        }
+
+        return $banner->image ?: null;
+    }
+
+    /** @return array<int, int> */
+    private function selectedProductIds(array $validated, ?Banner $banner = null): array
+    {
+        if (array_key_exists('selected_product_ids', $validated)) {
+            return array_values(array_map('intval', $validated['selected_product_ids'] ?? []));
+        }
+
+        if (array_key_exists('product_id', $validated) && $validated['product_id']) {
+            return [(int) $validated['product_id']];
+        }
+
+        return $banner?->selectedProducts->pluck('id')->map(fn ($id): int => (int) $id)->all() ?? [];
+    }
+
+    /** @return array<int, array{sort_order: int}> */
+    private function orderedProductIds(array $productIds): array
+    {
+        return collect($productIds)
+            ->values()
+            ->mapWithKeys(fn (int $productId, int $index): array => [$productId => ['sort_order' => $index]])
+            ->all();
     }
 }

@@ -8,9 +8,6 @@ import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { Toaster } from '@/components/ui/sonner';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
-import AuthLayout from '@/layouts/auth-layout';
-import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 const pages = import.meta.glob<{ default: StorefrontPageComponent }>(
@@ -25,10 +22,32 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) =>
-        resolvePageComponent(`./pages/${name}.tsx`, pages).then(
-            (module) => module.default as unknown as ResolvedComponent,
-        ),
+    resolve: async (name) => {
+        const module = await resolvePageComponent(`./pages/${name}.tsx`, pages);
+        const Component = module.default as StorefrontPageComponent;
+
+        if (name === 'welcome' || name.startsWith('store/')) {
+            return Component as unknown as ResolvedComponent;
+        }
+
+        if (name.startsWith('auth/')) {
+            Component.authLayout = (await import('@/layouts/auth-layout'))
+                .default as PageLayoutComponent;
+        } else if (name.startsWith('settings/')) {
+            const [appLayout, settingsLayout] = await Promise.all([
+                import('@/layouts/app-layout'),
+                import('@/layouts/settings/layout'),
+            ]);
+            Component.appLayout = appLayout.default as PageLayoutComponent;
+            Component.settingsLayout =
+                settingsLayout.default as PageLayoutComponent;
+        } else {
+            Component.appLayout = (await import('@/layouts/app-layout'))
+                .default as PageLayoutComponent;
+        }
+
+        return Component as unknown as ResolvedComponent;
+    },
     setup({ el, App, props }) {
         const app = (
             <StrictMode>
@@ -75,7 +94,12 @@ type LayoutProps = Record<string, unknown>;
 
 type StorefrontPageComponent = ComponentType<PageProps> & {
     layout?: LayoutProps | ((page: ReactElement) => ReactNode);
+    appLayout?: PageLayoutComponent;
+    authLayout?: PageLayoutComponent;
+    settingsLayout?: PageLayoutComponent;
 };
+
+type PageLayoutComponent = ComponentType<LayoutProps & { children: ReactNode }>;
 
 function PageWithLayout({
     Component,
@@ -93,9 +117,7 @@ function PageWithLayout({
         return <>{Component.layout(child)}</>;
     }
 
-    const layoutProps = isLayoutProps(Component.layout)
-        ? Component.layout
-        : {};
+    const layoutProps = isLayoutProps(Component.layout) ? Component.layout : {};
     const componentName = page.component;
 
     if (componentName === 'welcome' || componentName.startsWith('store/')) {
@@ -103,20 +125,33 @@ function PageWithLayout({
     }
 
     if (componentName.startsWith('auth/')) {
-        return <AuthLayout {...layoutProps}>{child}</AuthLayout>;
+        const Layout = Component.authLayout;
+
+        return Layout ? <Layout {...layoutProps}>{child}</Layout> : child;
     }
 
     if (componentName.startsWith('settings/')) {
+        const Layout = Component.appLayout;
+        const Settings = Component.settingsLayout;
+
+        if (!Layout || !Settings) {
+            return child;
+        }
+
         return (
-            <AppLayout {...layoutProps}>
-                <SettingsLayout>{child}</SettingsLayout>
-            </AppLayout>
+            <Layout {...layoutProps}>
+                <Settings>{child}</Settings>
+            </Layout>
         );
     }
 
-    return <AppLayout {...layoutProps}>{child}</AppLayout>;
+    const Layout = Component.appLayout;
+
+    return Layout ? <Layout {...layoutProps}>{child}</Layout> : child;
 }
 
 function isLayoutProps(layout: unknown): layout is LayoutProps {
-    return Boolean(layout) && typeof layout === 'object' && !Array.isArray(layout);
+    return (
+        Boolean(layout) && typeof layout === 'object' && !Array.isArray(layout)
+    );
 }

@@ -22,7 +22,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $product->load(['category', 'campaigns']);
+        $product->load(['category', 'campaigns', 'media']);
 
         return Inertia::render('store/ProductShow', [
             'product' => new ProductResource($product),

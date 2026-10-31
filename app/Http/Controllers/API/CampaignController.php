@@ -23,7 +23,11 @@ class CampaignController extends Controller
             $cacheKey = 'campaigns_all_active_'.($onlyActive ? 'yes' : 'no');
 
             $campaigns = Cache::remember($cacheKey, 600, function () use ($onlyActive) {
-                $query = Campaign::query()->with('product');
+                $query = Campaign::query()->with([
+                    'product.category',
+                    'product.campaigns',
+                    'product.media',
+                ]);
 
                 if ($onlyActive) {
                     $query->whereDate('start_date', '<=', now())
@@ -58,7 +62,11 @@ class CampaignController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Campaign created successfully',
-                'data' => new CampaignResource($campaign->load('product')),
+                'data' => new CampaignResource($campaign->load([
+                    'product.category',
+                    'product.campaigns',
+                    'product.media',
+                ])),
             ], 201);
         } catch (\Exception $e) {
             Log::error('Error creating campaign: '.$e->getMessage());
@@ -77,7 +85,11 @@ class CampaignController extends Controller
     public function show(string $id)
     {
         try {
-            $campaign = Campaign::with('product')->findOrFail($id);
+            $campaign = Campaign::with([
+                'product.category',
+                'product.campaigns',
+                'product.media',
+            ])->findOrFail($id);
 
             return new CampaignResource($campaign);
         } catch (\Exception $e) {
@@ -105,7 +117,11 @@ class CampaignController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Campaign updated successfully',
-                'data' => new CampaignResource($campaign->load('product')),
+                'data' => new CampaignResource($campaign->load([
+                    'product.category',
+                    'product.campaigns',
+                    'product.media',
+                ])),
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error updating campaign: '.$e->getMessage());

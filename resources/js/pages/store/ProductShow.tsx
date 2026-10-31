@@ -1,5 +1,15 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, MessageCircle, Package, ShoppingCart, Star, Tag, XCircle } from 'lucide-react';
+import {
+    ArrowLeft,
+    MessageCircle,
+    Package,
+    ShoppingCart,
+    Star,
+    Tag,
+    X,
+    XCircle,
+    ZoomIn,
+} from 'lucide-react';
 import { normalizeImageUrl } from '@/lib/media';
 import { useMemo, useState } from 'react';
 import type { Product } from './types';
@@ -17,7 +27,9 @@ interface ProductShowContentProps {
     whatsappPhone?: string;
 }
 
-function toFiniteNumber(value: number | string | null | undefined): number | null {
+function toFiniteNumber(
+    value: number | string | null | undefined,
+): number | null {
     if (typeof value === 'number') {
         return Number.isFinite(value) ? value : null;
     }
@@ -48,34 +60,53 @@ function toAbsoluteUrl(url: string | null | undefined): string | undefined {
     return `${origin}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
-function buildWhatsAppUrl(phone: string, product: Product, pageUrl: string): string {
+function buildWhatsAppUrl(
+    phone: string,
+    product: Product,
+    pageUrl: string,
+    imageUrl?: string,
+): string {
     const productName = product.name ?? 'Product';
     const categoryName = product.category ?? 'Uncategorized';
     const price = formatCurrency(product.price);
     const sku = product.product_id ? ` (SKU: ${product.product_id})` : '—';
 
+    const digits = phone.replace(/\D/g, '');
+    const internationalPhone = digits.startsWith('0')
+        ? `383${digits.slice(1)}`
+        : digits;
     const message =
         `Hi MMDECOR! I am interested in this product:\n\n` +
         `*Product:* ${productName}\n` +
         `*Price:* $${price}\n` +
         `*Category:* ${categoryName}\n` +
         `*SKU:* ${sku}\n\n` +
+        `${imageUrl ? `*Product Image:* ${imageUrl}\n` : ''}` +
         `*Product Link:* ${pageUrl}`;
 
-    return `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${internationalPhone}?text=${encodeURIComponent(message)}`;
 }
 
-export default function ProductShow({ product, whatsappPhone }: ProductShowProps) {
+export default function ProductShow({
+    product,
+    whatsappPhone,
+}: ProductShowProps) {
     const resolvedProduct = 'data' in product ? product.data : product;
 
     return (
         <CartProvider>
-            <ProductShowContent product={resolvedProduct} whatsappPhone={whatsappPhone} />
+            <ProductShowContent
+                product={resolvedProduct}
+                whatsappPhone={whatsappPhone}
+            />
         </CartProvider>
     );
 }
 
-function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps) {
+function ProductShowContent({
+    product,
+    whatsappPhone,
+}: ProductShowContentProps) {
     const { cartCount, setCartOpen, handleAddToCart, cartBusy } = useCart();
 
     const productName = product.name ?? 'Product';
@@ -88,19 +119,27 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
         const gallery = product.images?.length
             ? product.images
             : product.image
-                ? [{ url: product.image, thumb: product.image }]
-                : [];
+              ? [{ url: product.image, thumb: product.image }]
+              : [];
 
         return gallery
             .map((image) => ({
                 url: normalizeImageUrl(image.url) ?? undefined,
-                thumb: normalizeImageUrl(image.thumb) ?? normalizeImageUrl(image.url) ?? undefined,
+                thumb:
+                    normalizeImageUrl(image.thumb) ??
+                    normalizeImageUrl(image.url) ??
+                    undefined,
             }))
-            .filter((image): image is { url: string; thumb: string } => Boolean(image.url && image.thumb));
+            .filter((image): image is { url: string; thumb: string } =>
+                Boolean(image.url && image.thumb),
+            );
     }, [product.image, product.images]);
-    const [selectedImageUrl, setSelectedImageUrl] = useState(() => imageGallery[0]?.url);
+    const [selectedImageUrl, setSelectedImageUrl] = useState(
+        () => imageGallery[0]?.url,
+    );
+    const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
     const imageUrl = selectedImageUrl ?? imageGallery[0]?.url;
-    const absoluteImageUrl = toAbsoluteUrl(imageGallery[0]?.url);
+    const absoluteImageUrl = toAbsoluteUrl(imageUrl);
     const isInStock = (product.stock ?? 0) > 0;
     const isOnSale =
         product.tag === 'SALE' &&
@@ -114,19 +153,26 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
             : null);
 
     const pageUrl = typeof window !== 'undefined' ? window.location.href : '';
-    const whatsappUrl =
-        whatsappPhone
-            ? buildWhatsAppUrl(whatsappPhone, product, pageUrl)
-            : null;
+    const whatsappUrl = whatsappPhone
+        ? buildWhatsAppUrl(whatsappPhone, product, pageUrl, absoluteImageUrl)
+        : null;
 
     return (
         <>
             <Head>
                 <title>{productName}</title>
-                <meta name="description" content={`Compatible with most ${categoryLowerName} applications. High-quality part with guaranteed fitment.`} />
+                <meta
+                    name="description"
+                    content={`Compatible with most ${categoryLowerName} applications. High-quality part with guaranteed fitment.`}
+                />
                 <meta property="og:title" content={productName} />
-                <meta property="og:description" content={`Interested in ${productName}? Price: $${formatCurrency(priceValue)}. Category: ${categoryName}.`} />
-                {absoluteImageUrl && <meta property="og:image" content={absoluteImageUrl} />}
+                <meta
+                    property="og:description"
+                    content={`Interested in ${productName}? Price: $${formatCurrency(priceValue)}. Category: ${categoryName}.`}
+                />
+                {absoluteImageUrl && (
+                    <meta property="og:image" content={absoluteImageUrl} />
+                )}
                 <meta property="og:type" content="product" />
                 <meta property="og:url" content={pageUrl} />
             </Head>
@@ -140,20 +186,25 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
             {/* Main */}
             <main className="min-h-screen bg-[#F5FAFE] pb-24">
                 <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-
                     {/* Breadcrumb & Back Link */}
                     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <nav className="flex items-center gap-2 text-xs text-[#0D2535]/40">
-                            <Link href="/" className="hover:text-[#2E6F8F]">Home</Link>
+                            <Link href="/" className="hover:text-[#2E6F8F]">
+                                Home
+                            </Link>
                             <span>/</span>
-                            <span className="text-[#2E6F8F]">{categoryName}</span>
+                            <span className="text-[#2E6F8F]">
+                                {categoryName}
+                            </span>
                             <span>/</span>
-                            <span className="truncate font-medium text-[#0D2535]/70">{productName}</span>
+                            <span className="truncate font-medium text-[#0D2535]/70">
+                                {productName}
+                            </span>
                         </nav>
 
                         <Link
                             href="/"
-                            className="inline-flex items-center gap-2 text-sm font-bold text-[#2E6F8F] transition hover:text-[#1E5A7A] self-start"
+                            className="inline-flex items-center gap-2 self-start text-sm font-bold text-[#2E6F8F] transition hover:text-[#1E5A7A]"
                         >
                             <ArrowLeft size={16} />
                             Back to store
@@ -161,9 +212,8 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                     </div>
 
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-
                         {/* ── Image panel ── */}
-                        <div className="relative overflow-hidden rounded-2xl border border-[#D1E8F2] bg-gradient-to-br from-[#EBF3F7] to-[#D0E8F2] shadow-sm">
+                        <div className="relative overflow-hidden rounded-2xl border border-[#D1E8F2] bg-white shadow-sm">
                             {/* Discount badge */}
                             {isOnSale && discountPct && (
                                 <div className="absolute top-4 left-4 z-10 rounded-full bg-red-500 px-3 py-1 text-xs font-black text-white shadow">
@@ -180,43 +230,116 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
 
                             {imageUrl ? (
                                 <>
-                                    <img
-                                        src={imageUrl}
-                                        alt={productName}
-                                        className="aspect-square w-full object-cover"
+                                    <ShoppingCart
+                                        size={64}
+                                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[#2E6F8F]/20"
+                                        aria-hidden="true"
                                     />
+                                    <button
+                                        type="button"
+                                        className="group block w-full cursor-zoom-in"
+                                        onClick={() =>
+                                            setZoomedImageUrl(imageUrl)
+                                        }
+                                        aria-label="Zoom product image"
+                                    >
+                                        <img
+                                            src={imageUrl}
+                                            alt={productName}
+                                            loading="eager"
+                                            fetchPriority="high"
+                                            decoding="async"
+                                            onError={(event) => {
+                                                event.currentTarget.style.display =
+                                                    'none';
+                                            }}
+                                            className="aspect-square w-full bg-white object-contain p-3 transition duration-200 group-hover:scale-[1.02] sm:p-6"
+                                        />
+                                        <span className="absolute right-4 bottom-4 inline-flex items-center gap-1.5 rounded-full bg-[#0D2535]/85 px-3 py-2 text-xs font-bold text-white opacity-90 shadow transition group-hover:bg-[#2E6F8F]">
+                                            <ZoomIn size={14} />
+                                            Zoom
+                                        </span>
+                                    </button>
                                     {imageGallery.length > 1 && (
                                         <div className="grid grid-cols-4 gap-2 border-t border-[#D1E8F2] bg-white p-2">
-                                            {imageGallery.map((image, index) => (
-                                                <button
-                                                    key={`${image.thumb}-${index}`}
-                                                    type="button"
-                                                    onClick={() => setSelectedImageUrl(image.url)}
-                                                    className={`aspect-square overflow-hidden rounded-lg border-2 bg-[#F5FAFE] transition ${
-                                                        imageUrl === image.url ? 'border-[#2E6F8F]' : 'border-transparent hover:border-[#D1E8F2]'
-                                                    }`}
-                                                    aria-label={`Show product image ${index + 1}`}
-                                                >
-                                                    <img
-                                                        src={image.thumb}
-                                                        alt={`${productName} thumbnail ${index + 1}`}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                </button>
-                                            ))}
+                                            {imageGallery.map(
+                                                (image, index) => (
+                                                    <button
+                                                        key={`${image.thumb}-${index}`}
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setSelectedImageUrl(
+                                                                image.url,
+                                                            )
+                                                        }
+                                                        className={`aspect-square overflow-hidden rounded-lg border-2 bg-white transition ${
+                                                            imageUrl ===
+                                                            image.url
+                                                                ? 'border-[#2E6F8F]'
+                                                                : 'border-transparent hover:border-[#D1E8F2]'
+                                                        }`}
+                                                        aria-label={`Show product image ${index + 1}`}
+                                                    >
+                                                        <img
+                                                            src={image.thumb}
+                                                            alt={`${productName} thumbnail ${index + 1}`}
+                                                            loading="lazy"
+                                                            decoding="async"
+                                                            onError={(
+                                                                event,
+                                                            ) => {
+                                                                event.currentTarget.style.display =
+                                                                    'none';
+                                                            }}
+                                                            className="h-full w-full object-contain p-1"
+                                                        />
+                                                    </button>
+                                                ),
+                                            )}
                                         </div>
                                     )}
                                 </>
                             ) : (
                                 <div className="flex aspect-square w-full items-center justify-center">
-                                    <ShoppingCart size={64} className="text-[#2E6F8F]/20" />
+                                    <ShoppingCart
+                                        size={64}
+                                        className="text-[#2E6F8F]/20"
+                                    />
                                 </div>
                             )}
                         </div>
 
+                        {zoomedImageUrl && (
+                            <div
+                                className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D2535]/85 p-4 backdrop-blur-sm sm:p-8"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-label={`${productName} enlarged image`}
+                                onClick={() => setZoomedImageUrl(null)}
+                            >
+                                <div
+                                    className="relative flex max-h-[90vh] max-w-6xl items-center justify-center rounded-2xl bg-white p-3 shadow-2xl sm:p-6"
+                                    onClick={(event) => event.stopPropagation()}
+                                >
+                                    <img
+                                        src={zoomedImageUrl}
+                                        alt={`${productName} enlarged`}
+                                        className="max-h-[82vh] max-w-[90vw] object-contain"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="absolute top-3 right-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#0D2535]/90 text-white shadow transition hover:bg-[#2E6F8F]"
+                                        onClick={() => setZoomedImageUrl(null)}
+                                        aria-label="Close enlarged image"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* ── Info panel ── */}
                         <div className="flex flex-col gap-5">
-
                             {/* Category + brand */}
                             <div className="flex items-center gap-2">
                                 <span className="rounded-full bg-[#EBF3F7] px-3 py-1 text-[11px] font-black tracking-widest text-[#2E6F8F] uppercase">
@@ -230,13 +353,13 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                             </div>
 
                             {/* Name */}
-                            <h1 className="text-2xl font-black leading-tight text-[#0D2535] sm:text-3xl">
+                            <h1 className="text-2xl leading-tight font-black text-[#0D2535] sm:text-3xl">
                                 {productName}
                             </h1>
 
                             {/* SKU */}
                             {product.product_id && (
-                                <p className="text-xs font-semibold text-[#0D2535]/35 uppercase tracking-wider">
+                                <p className="text-xs font-semibold tracking-wider text-[#0D2535]/35 uppercase">
                                     SKU: {product.product_id}
                                 </p>
                             )}
@@ -249,7 +372,8 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                                             key={i}
                                             size={14}
                                             className={
-                                                i < Math.round(product.rating ?? 0)
+                                                i <
+                                                Math.round(product.rating ?? 0)
                                                     ? 'fill-amber-400 text-amber-400'
                                                     : 'text-[#D1E8F2]'
                                             }
@@ -257,15 +381,18 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                                     ))}
                                 </div>
                                 <span className="text-sm text-[#0D2535]/40">
-                                    {(product.rating ?? 0).toFixed(1)} ({product.reviews} reviews)
+                                    {(product.rating ?? 0).toFixed(1)} (
+                                    {product.reviews} reviews)
                                 </span>
                             </div>
 
                             {/* Price */}
-                            <div className="flex items-baseline gap-3 rounded-xl bg-white p-4 shadow-sm border border-[#EBF3F7]">
+                            <div className="flex items-baseline gap-3 rounded-xl border border-[#EBF3F7] bg-white p-4 shadow-sm">
                                 <span
                                     className={`text-3xl font-black sm:text-4xl ${
-                                        isOnSale ? 'text-red-500' : 'text-[#0D2535]'
+                                        isOnSale
+                                            ? 'text-red-500'
+                                            : 'text-[#0D2535]'
                                     }`}
                                 >
                                     ${formatCurrency(priceValue)}
@@ -281,35 +408,44 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                             <div className="flex items-center gap-2">
                                 {isInStock ? (
                                     <div className="flex items-center gap-2">
-                                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                                         <span className="text-sm font-semibold text-emerald-600">
                                             In Stock
                                             {product.stock !== undefined && (
                                                 <span className="ml-1 font-normal text-[#0D2535]/40">
-                                                    ({product.stock} units available)
+                                                    ({product.stock} units
+                                                    available)
                                                 </span>
                                             )}
                                         </span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2">
-                                        <XCircle size={16} className="text-red-400" />
-                                        <span className="text-sm font-semibold text-red-500">Out of Stock</span>
+                                        <XCircle
+                                            size={16}
+                                            className="text-red-400"
+                                        />
+                                        <span className="text-sm font-semibold text-red-500">
+                                            Out of Stock
+                                        </span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Description placeholder */}
                             <p className="text-sm leading-relaxed text-[#0D2535]/55">
-                                Compatible with most {categoryLowerName} applications.
-                                High-quality part with guaranteed fitment. Contact us via WhatsApp
-                                for compatibility questions before ordering.
+                                Compatible with most {categoryLowerName}{' '}
+                                applications. High-quality part with guaranteed
+                                fitment. Contact us via WhatsApp for
+                                compatibility questions before ordering.
                             </p>
 
                             {/* CTA buttons */}
                             <div className="flex flex-col gap-3 sm:flex-row">
                                 <button
-                                    onClick={() => void handleAddToCart(product)}
+                                    onClick={() =>
+                                        void handleAddToCart(product)
+                                    }
                                     disabled={cartBusy || !isInStock}
                                     className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2E6F8F] px-6 py-3.5 text-sm font-black text-white shadow transition hover:bg-[#1E5A7A] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
@@ -348,13 +484,28 @@ function ProductShowContent({ product, whatsappPhone }: ProductShowContentProps)
                                         ['Category', categoryName],
                                         ['Brand', brandName],
                                         ['SKU', product.product_id ?? '—'],
-                                        ['Stock', isInStock ? `${product.stock ?? '—'} units` : 'Out of stock'],
-                                        ['Price', `$${formatCurrency(priceValue)}`],
+                                        [
+                                            'Stock',
+                                            isInStock
+                                                ? `${product.stock ?? '—'} units`
+                                                : 'Out of stock',
+                                        ],
+                                        [
+                                            'Price',
+                                            `$${formatCurrency(priceValue)}`,
+                                        ],
                                         ['Condition', 'New'],
                                     ].map(([label, value]) => (
-                                        <div key={label} className="flex flex-col">
-                                            <dt className="text-[11px] font-bold text-[#0D2535]/40 uppercase tracking-wider">{label}</dt>
-                                            <dd className="font-semibold text-[#0D2535]">{value}</dd>
+                                        <div
+                                            key={label}
+                                            className="flex flex-col"
+                                        >
+                                            <dt className="text-[11px] font-bold tracking-wider text-[#0D2535]/40 uppercase">
+                                                {label}
+                                            </dt>
+                                            <dd className="font-semibold text-[#0D2535]">
+                                                {value}
+                                            </dd>
                                         </div>
                                     ))}
                                 </dl>

@@ -1,5 +1,5 @@
-
 import { Phone } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
 import { memo } from 'react';
 
 const FOOTER_COLUMNS = [
@@ -30,6 +30,12 @@ const FOOTER_COLUMNS = [
 ];
 
 export const StoreFooter = memo(function StoreFooter() {
+    const { whatsappPhone } = usePage().props;
+    const phoneDigits = whatsappPhone.replace(/\D/g, '');
+    const internationalPhone = phoneDigits.startsWith('0')
+        ? `+383${phoneDigits.slice(1)}`
+        : `+${phoneDigits}`;
+
     return (
         <footer className="border-t border-[#E2EEF4] bg-white">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -46,10 +52,10 @@ export const StoreFooter = memo(function StoreFooter() {
                             parts. Fast shipping, genuine quality.
                         </p>
                         <a
-                            href="tel:+18005551234"
+                            href={`tel:${internationalPhone}`}
                             className="flex items-center gap-1.5 text-sm font-semibold text-[#0D2535]/55 transition-colors hover:text-[#2E6F8F]"
                         >
-                            <Phone size={13} /> 1-800-555-1234
+                            <Phone size={13} /> 045 446 665
                         </a>
                     </div>
 

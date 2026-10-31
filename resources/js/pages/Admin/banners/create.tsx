@@ -1,34 +1,36 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Package, Save, Tag } from 'lucide-react';
+import { ArrowLeft, Package, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
+import { normalizeImageUrl } from '@/lib/media';
 
-export interface DiscountedProduct {
+export interface BannerProductOption {
     id: number;
     name: string;
     image: string | null;
-    discount: number;
+    price: number;
+    stock: number;
 }
 
 interface CreateProps {
-    discountedProducts: DiscountedProduct[];
+    products: BannerProductOption[];
 }
 
-export default function Create({ discountedProducts }: CreateProps) {
+export default function Create({ products }: CreateProps) {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         subtitle: '',
-        product_id: '' as string | number,
+        selected_product_ids: [] as number[],
         image: null as File | null,
     });
 
-    const selectedProduct = useMemo(
-        () => discountedProducts.find((p) => p.id === Number(data.product_id)) ?? null,
-        [data.product_id, discountedProducts],
+    const selectedProducts = useMemo(
+        () => products.filter((product) => data.selected_product_ids.includes(product.id)),
+        [data.selected_product_ids, products],
     );
 
     const previewUrl = useMemo(
-        () => (data.image ? URL.createObjectURL(data.image) : selectedProduct?.image ?? null),
-        [data.image, selectedProduct],
+        () => (data.image ? URL.createObjectURL(data.image) : normalizeImageUrl(selectedProducts[0]?.image)),
+        [data.image, selectedProducts],
     );
 
     useEffect(
@@ -73,8 +75,8 @@ export default function Create({ discountedProducts }: CreateProps) {
                             errors={errors}
                             setData={setData}
                             previewUrl={previewUrl}
-                            discountedProducts={discountedProducts}
-                            selectedProduct={selectedProduct}
+                            products={products}
+                            selectedProducts={selectedProducts}
                         />
 
                         <div className="flex justify-end gap-3 border-t border-[#F0F7FB] pt-6">
@@ -103,17 +105,17 @@ export default function Create({ discountedProducts }: CreateProps) {
 export interface BannerFormData {
     title: string;
     subtitle: string;
-    product_id: string | number;
+    selected_product_ids: number[];
     image: File | null;
 }
 
 export interface BannerFieldsProps {
     data: BannerFormData;
     errors: Partial<Record<keyof BannerFormData, string>>;
-    setData: (field: keyof BannerFormData, value: string | number | File | null) => void;
+    setData: (field: keyof BannerFormData, value: string | number | number[] | File | null) => void;
     previewUrl?: string | null;
-    discountedProducts: DiscountedProduct[];
-    selectedProduct?: DiscountedProduct | null;
+    products: BannerProductOption[];
+    selectedProducts: BannerProductOption[];
 }
 
 export function BannerFields({
@@ -121,8 +123,8 @@ export function BannerFields({
     errors,
     setData,
     previewUrl,
-    discountedProducts,
-    selectedProduct,
+    products,
+    selectedProducts,
 }: BannerFieldsProps) {
     return (
         <>
@@ -178,88 +180,80 @@ export function BannerFields({
                 )}
             </div>
 
-            {/* Discounted product selector */}
+            {/* Carousel product selector */}
             <div>
                 <label
-                    htmlFor="product_id"
+                    htmlFor="selected_product_ids"
                     className="block text-sm font-black text-[#0D2535]"
                 >
-                    Featured Discount Product
+                    Carousel Products
                     <span className="ml-1.5 text-xs font-medium text-[#0D2535]/45">
                         (optional)
                     </span>
                 </label>
                 <p className="mt-0.5 text-xs text-[#0D2535]/45">
-                    Select a product on discount to feature on this banner. Its image will be used automatically.
+                    Select the existing products that should appear on this banner in the storefront carousel. Hold Ctrl/Cmd to select multiple.
                 </p>
 
-                {discountedProducts.length === 0 ? (
+                {products.length === 0 ? (
                     <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-[#D1E8F2] bg-[#F7FAFB] px-4 py-3">
                         <Package size={14} className="text-[#0D2535]/30" />
                         <span className="text-sm text-[#0D2535]/40">
-                            No discounted products available. Add a campaign to a product first.
+                            No products available yet. Create a product first.
                         </span>
                     </div>
                 ) : (
                     <select
-                        id="product_id"
-                        value={data.product_id}
-                        onChange={(e) => setData('product_id', e.target.value)}
+                        id="selected_product_ids"
+                        multiple
+                        value={data.selected_product_ids.map(String)}
+                        onChange={(e) => setData('selected_product_ids', Array.from(e.target.selectedOptions, (option) => Number(option.value)))}
                         className={`mt-1.5 w-full rounded-xl border ${
-                            errors.product_id
+                            errors.selected_product_ids
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-[#D1E8F2] focus:border-[#2E6F8F]'
                         } bg-white px-4 py-3 text-sm font-medium text-[#0D2535] transition-colors focus:outline-none`}
                     >
-                        <option value="">— No product (image only) —</option>
-                        {discountedProducts.map((product) => (
+                        {products.map((product) => (
                             <option key={product.id} value={product.id}>
-                                {product.name} — {product.discount}% off
+                                {product.name} — {'$'}{product.price.toFixed(2)}
                             </option>
                         ))}
                     </select>
                 )}
 
-                {errors.product_id && (
+                {errors.selected_product_ids && (
                     <p className="mt-1.5 text-xs font-semibold text-red-500">
-                        {errors.product_id}
+                        {errors.selected_product_ids}
                     </p>
                 )}
 
                 {/* Selected product preview card */}
-                {selectedProduct && (
+                {selectedProducts.length > 0 && (
                     <div className="mt-3 flex items-center gap-3 rounded-xl border border-[#D1E8F2] bg-[#EBF3F7]/50 px-4 py-3">
-                        {selectedProduct.image && (
+                        {selectedProducts[0].image && (
                             <img
-                                src={selectedProduct.image}
-                                alt={selectedProduct.name}
+                                src={normalizeImageUrl(selectedProducts[0].image) ?? undefined}
+                                alt={selectedProducts[0].name}
                                 className="h-12 w-12 rounded-lg border border-[#D1E8F2] object-cover"
                             />
                         )}
                         <div className="flex-1 min-w-0">
                             <p className="truncate text-sm font-bold text-[#0D2535]">
-                                {selectedProduct.name}
+                                {selectedProducts.map((product) => product.name).join(', ')}
                             </p>
-                            <span className="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-px text-[11px] font-black text-red-600">
-                                <Tag size={9} />
-                                {selectedProduct.discount}% off
-                            </span>
                         </div>
                     </div>
                 )}
             </div>
 
+            {selectedProducts.length === 0 && (
             <div>
                 <label
                     htmlFor="image"
                     className="block text-sm font-black text-[#0D2535]"
                 >
                     Banner Image
-                    {data.product_id && (
-                        <span className="ml-1.5 text-xs font-medium text-[#0D2535]/45">
-                            (optional — product image used if left empty)
-                        </span>
-                    )}
                 </label>
                 <input
                     id="image"
@@ -286,13 +280,14 @@ export function BannerFields({
                             {data.image ? 'Uploaded preview' : 'Product image (auto)'}
                         </p>
                         <img
-                            src={previewUrl}
+                            src={previewUrl ?? undefined}
                             alt="Banner preview"
                             className="h-32 w-56 rounded-xl border border-[#D1E8F2] object-cover"
                         />
                     </div>
                 )}
             </div>
+            )}
         </>
     );
 }

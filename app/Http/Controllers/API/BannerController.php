@@ -20,7 +20,15 @@ class BannerController extends Controller
     {
         try {
             $banners = Cache::remember('banners_all', 600, function () {
-                return Banner::with(['product', 'product.campaigns'])->get();
+                return Banner::with([
+                    'media',
+                    'product.category',
+                    'product.campaigns',
+                    'product.media',
+                    'selectedProducts.category',
+                    'selectedProducts.campaigns',
+                    'selectedProducts.media',
+                ])->get();
             });
 
             return BannerResource::collection($banners);
@@ -42,11 +50,14 @@ class BannerController extends Controller
     {
         try {
             $validated = $request->validated();
+            $selectedProductIds = $this->selectedProductIds($validated);
 
             $banner = Banner::create([
-                ...collect($validated)->except('image')->all(),
+                ...collect($validated)->except(['image', 'selected_product_ids', 'product_id'])->all(),
+                'product_id' => $selectedProductIds[0] ?? ($validated['product_id'] ?? null),
                 'image' => '',
             ]);
+            $banner->selectedProducts()->sync($this->orderedProductIds($selectedProductIds));
 
             $this->attachImage($banner, $request->file('image'));
 
@@ -55,7 +66,7 @@ class BannerController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Banner created successfully',
-                'data' => new BannerResource($banner),
+                'data' => new BannerResource($banner->load(['media', 'product', 'selectedProducts'])),
             ], 201);
         } catch (\Exception $e) {
             Log::error('Error creating banner: '.$e->getMessage());
@@ -74,7 +85,7 @@ class BannerController extends Controller
     public function show(string $id)
     {
         try {
-            $banner = Banner::findOrFail($id);
+            $banner = Banner::with(['media', 'product', 'selectedProducts'])->findOrFail($id);
 
             return new BannerResource($banner);
         } catch (\Exception $e) {
@@ -96,8 +107,15 @@ class BannerController extends Controller
         try {
             $banner = Banner::findOrFail($id);
             $validated = $request->validated();
+            $selectedProductIds = $this->selectedProductIds($validated, $banner);
 
-            $banner->update(collect($validated)->except('image')->all());
+            $banner->update([
+                ...collect($validated)->except(['image', 'selected_product_ids', 'product_id'])->all(),
+                'product_id' => $selectedProductIds[0] ?? ($validated['product_id'] ?? null),
+            ]);
+            if (array_key_exists('selected_product_ids', $validated) || array_key_exists('product_id', $validated)) {
+                $banner->selectedProducts()->sync($this->orderedProductIds($selectedProductIds));
+            }
 
             $this->attachImage($banner, $request->file('image'));
 
@@ -106,7 +124,7 @@ class BannerController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Banner updated successfully',
-                'data' => new BannerResource($banner),
+                'data' => new BannerResource($banner->load(['media', 'product', 'selectedProducts'])),
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error updating banner: '.$e->getMessage());
@@ -157,5 +175,28 @@ class BannerController extends Controller
             ->toMediaCollection('images');
 
         $banner->syncImageColumnFromMedia();
+    }
+
+    /** @return array<int, int> */
+    private function selectedProductIds(array $validated, ?Banner $banner = null): array
+    {
+        if (array_key_exists('selected_product_ids', $validated)) {
+            return array_values(array_map('intval', $validated['selected_product_ids'] ?? []));
+        }
+
+        if (array_key_exists('product_id', $validated) && $validated['product_id']) {
+            return [(int) $validated['product_id']];
+        }
+
+        return $banner?->selectedProducts->pluck('id')->map(fn ($id): int => (int) $id)->all() ?? [];
+    }
+
+    /** @return array<int, array{sort_order: int}> */
+    private function orderedProductIds(array $productIds): array
+    {
+        return collect($productIds)
+            ->values()
+            ->mapWithKeys(fn (int $productId, int $index): array => [$productId => ['sort_order' => $index]])
+            ->all();
     }
 }
